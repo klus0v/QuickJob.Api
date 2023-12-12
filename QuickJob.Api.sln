@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickJob.Api", "QuickJob.Api\QuickJob.Api.csproj", "{13810434-BED5-4BD8-9F35-B21EA8B0CC66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickJob.DataModel", "QuickJob.DataModel\QuickJob.DataModel.csproj", "{A39032F4-BFF9-47C2-B283-847CA850C8B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickJob.BusinessLogic", "QuickJob.BusinessLogic\QuickJob.BusinessLogic.csproj", "{1115D94B-E8D5-4881-B53C-F150252249D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{13810434-BED5-4BD8-9F35-B21EA8B0CC66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13810434-BED5-4BD8-9F35-B21EA8B0CC66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13810434-BED5-4BD8-9F35-B21EA8B0CC66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13810434-BED5-4BD8-9F35-B21EA8B0CC66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A39032F4-BFF9-47C2-B283-847CA850C8B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A39032F4-BFF9-47C2-B283-847CA850C8B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A39032F4-BFF9-47C2-B283-847CA850C8B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A39032F4-BFF9-47C2-B283-847CA850C8B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1115D94B-E8D5-4881-B53C-F150252249D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1115D94B-E8D5-4881-B53C-F150252249D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1115D94B-E8D5-4881-B53C-F150252249D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1115D94B-E8D5-4881-B53C-F150252249D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
