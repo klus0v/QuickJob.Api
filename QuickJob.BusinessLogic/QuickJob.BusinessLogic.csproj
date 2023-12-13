@@ -6,4 +6,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Storages\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\QuickJob.DataModel\QuickJob.DataModel.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
+using QuickJob.Api.Authentication;
 using QuickJob.Api.DI;
 
 const string FrontSpecificOrigins = "_frontSpecificOrigins";
@@ -20,6 +21,7 @@ var app = builder.Build();
 app.UseDeveloperExceptionPage().UseSwaggerUi3().UseOpenApi();
 app.UseHttpsRedirection();
 app.UseExceptionHandler(ConfigureMiddleware());
+app.UseMiddleware<UserAuthMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

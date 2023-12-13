@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using QuickJob.BusinessLogic.Services;
+using QuickJob.BusinessLogic.Services.Implementations;
 using QuickJob.DataModel.Configuration;
 using Vostok.Configuration.Sources.Json;
 using Vostok.Logging.Abstractions;
@@ -74,7 +76,8 @@ internal static class ServiceCollectionExtensions
     }
 
     public static void AddSystemServices(this IServiceCollection services) => services
-        .AddDistributedMemoryCache();
+        .AddDistributedMemoryCache()
+        .AddSingleton<IOrdersService, OrdersService>();
 
     public static void AddExternalServices(this IServiceCollection services)
     {

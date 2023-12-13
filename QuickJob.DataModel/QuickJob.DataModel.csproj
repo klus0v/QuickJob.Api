@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Vostok.Context" Version="0.1.7" />
+    </ItemGroup>
+
 </Project>
