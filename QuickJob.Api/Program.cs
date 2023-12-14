@@ -26,6 +26,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseCors(FrontSpecificOrigins);
+    
 
 app.Run();
 

@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using QuickJob.BusinessLogic.Services;
 using QuickJob.BusinessLogic.Services.Implementations;
+using QuickJob.BusinessLogic.Storages;
+using QuickJob.BusinessLogic.Storages.Implementations;
 using QuickJob.DataModel.Configuration;
+using QuickJob.DataModel.Postgres;
 using Vostok.Configuration.Sources.Json;
 using Vostok.Logging.Abstractions;
 using Vostok.Logging.Console;
@@ -47,19 +51,21 @@ internal static class ServiceCollectionExtensions
             });
     }
     
+    public static IServiceCollection AddPostgresStorage(this IServiceCollection services)
+    {
+        var serviceProvider = services.BuildServiceProvider();
+        var postgresSettings = serviceProvider.GetRequiredService<IConfigurationProvider>().Get<PostgresSettings>();
+        
+        return services.AddDbContext<QuickJobContext>(
+                options => options
+                    .UseNpgsql(postgresSettings.DbConnectionString),
+                optionsLifetime: ServiceLifetime.Singleton)
+            .AddSingleton<OrdersStorage>();
+    }
+    
     public static void AddServiceSwaggerDocument(this IServiceCollection services)
     {
-        services.AddSwaggerDocument(doc =>
-        {
-            doc.Title = "QuickJob.Api";
-            doc.AddSecurity("Bearer", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
-            {
-                Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
-                Name = "Authorization",
-                In = NSwag.OpenApiSecurityApiKeyLocation.Header,
-                Description = "Type into the textbox: Bearer {your JWT token}."
-            });
-        });
+        
     }
 
     public static void AddSettings(this IServiceCollection services)
@@ -68,7 +74,7 @@ internal static class ServiceCollectionExtensions
 
         provider.SetupSourceFor<ServiceSettings>(new JsonFileSource("Properties/ServiceSettings.json"));
         provider.SetupSourceFor<StorageSettings>(new JsonFileSource("Properties/StorageSettings.json"));
-        provider.SetupSourceFor<MongoSettings>(new JsonFileSource("Properties/MongoSettings.json"));
+        provider.SetupSourceFor<PostgresSettings>(new JsonFileSource("Properties/PostgresSettings.json"));
         provider.SetupSourceFor<SmtpSettings>(new JsonFileSource("Properties/SmtpSettings.json"));
         provider.SetupSourceFor<KeycloackSettings>(new JsonFileSource("Properties/KeycloackSettings.json"));
 
@@ -77,7 +83,9 @@ internal static class ServiceCollectionExtensions
 
     public static void AddSystemServices(this IServiceCollection services) => services
         .AddDistributedMemoryCache()
-        .AddSingleton<IOrdersService, OrdersService>();
+        .AddSingleton<IOrdersService, OrdersService>()
+        .AddSingleton<IOrdersStorage, OrdersStorage>()
+        .AddSingleton<IResponsesStorage, ResponsesStorage>();
 
     public static void AddExternalServices(this IServiceCollection services)
     {
@@ -86,9 +94,6 @@ internal static class ServiceCollectionExtensions
         services
             .AddSingleton<S3ClientFactory>()
             .TryAddSingleton(x => x.GetRequiredService<S3ClientFactory>().GetClient());
-        services
-            .AddSingleton<MongoFactory>()
-            .TryAddSingleton(x => x.GetRequiredService<MongoFactory>().GetClient());
         services
             .AddSingleton<SmtpClientFactory>()
             .TryAddSingleton(x => x.GetRequiredService<SmtpClientFactory>().GetClient());

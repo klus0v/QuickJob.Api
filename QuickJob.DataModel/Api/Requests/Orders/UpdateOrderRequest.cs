@@ -1,4 +1,4 @@
-using QuickJob.DataModel.Entites.Base;
+using QuickJob.DataModel.Postgres.Entities.Base;
 
 namespace QuickJob.DataModel.Api.Requests.Orders;
 

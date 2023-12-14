@@ -1,15 +1,27 @@
 using System.ComponentModel.Design;
+using System.Net;
+using QuickJob.BusinessLogic.Storages;
 using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
 using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Context;
-using QuickJob.DataModel.Entites;
+using QuickJob.DataModel.Exceptions;
+using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Services.Implementations;
 
 public class OrdersService : IOrdersService
 {
+    private readonly IOrdersStorage ordersStorage;
+    private readonly IResponsesStorage responsesStorage;
+
+    public OrdersService(IOrdersStorage ordersStorage, IResponsesStorage responsesStorage)
+    {
+        this.ordersStorage = ordersStorage;
+        this.responsesStorage = responsesStorage;
+    }
+
     public async Task<OrderResponse> CreateOrder(CreateOrderRequest createOrderRequest)
     {
         var order = new Order(createOrderRequest)
@@ -25,18 +37,25 @@ public class OrdersService : IOrdersService
     
     public async Task<OrderResponse> GetOrder(Guid orderId)
     {
-        //XZXZ
-        //var order = await ordersStorage.GetOrderById(orderId);
-        var order =  new OrderResponse
-        {
-            
-        };
-        if (order.CustomerId != RequestContext.ClientInfo.UserId)
-            return order;
+        var orderResult = await ordersStorage.GetOrderById(orderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomException($"Ошибка получения заказа: '{orderId}'", 500);
+        var order = orderResult.Response;
+        
+        var userId = RequestContext.ClientInfo.UserId;
+        if (!order.IsActive && order.CustomerId != userId)
+            throw new HttpRequestException("Order not found", null, HttpStatusCode.NotFound);
 
-        //var responses = await responsesStorage.GetResponsesByOrderId(orderId).Were(x => x.Status != Rejected);
-        order.Responses = new List<ResponseResponse>() { };
-        return order;
+        var orderResponse = new OrderResponse(order);
+        if (order.CustomerId == userId)
+        {
+            var responsesResult = await responsesStorage.GetResponsesByOrderId(orderId);
+            if (!responsesResult.IsSuccessful)
+                throw new CustomException($"Ошибка получения ответов для заказа: '{orderId}'", 500);
+            orderResponse.Responses = responsesResult.Response.Select(resp => new ResponseResponse(resp));
+        }
+        
+        return orderResponse;
     }
 
     public async Task<OrderResponse> UpdateOrder(Guid orderId, UpdateOrderRequest updateOrderRequest)

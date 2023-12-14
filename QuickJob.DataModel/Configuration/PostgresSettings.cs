@@ -1,7 +1,8 @@
 ﻿namespace QuickJob.DataModel.Configuration;
 
-public class MongoSettings
+public class PostgresSettings
 {
+    public string DbConnectionString { get; set; }
     public string Database { get; set; }
     public string Host { get; set; }
     public int Port { get; set; }

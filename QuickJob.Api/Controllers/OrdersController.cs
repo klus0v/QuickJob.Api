@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuickJob.BusinessLogic.Services;
@@ -25,6 +26,7 @@ public class OrdersController : ControllerBase
         return Ok(order);
     }
     
+    [AllowAnonymous]
     [HttpGet("{orderId}")]
     public async Task<IActionResult> Get(Guid orderId)
     {
