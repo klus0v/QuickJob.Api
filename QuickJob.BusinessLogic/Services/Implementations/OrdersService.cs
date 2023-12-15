@@ -10,7 +10,7 @@ using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Services.Implementations;
 
-public class OrdersService : IOrdersService
+public sealed class OrdersService : IOrdersService
 {
     private readonly IOrdersStorage ordersStorage;
     private readonly IResponsesStorage responsesStorage;
@@ -23,15 +23,13 @@ public class OrdersService : IOrdersService
 
     public async Task<OrderResponse> CreateOrder(CreateOrderRequest createOrderRequest)
     {
-        var order = new Order(createOrderRequest)
-        {
-            CustomerId = RequestContext.ClientInfo.UserId
-        };
-        //await ordersStorage.CreateOrder(order);
-        return new OrderResponse
-        {
-            
-        };
+        var order = new Order(createOrderRequest, RequestContext.ClientInfo.UserId);
+
+        var createResult = await ordersStorage.CreateOrder(order);
+        if (!createResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(createResult.ErrorResult.ErrorMessage) );
+
+        return new OrderResponse(order);
     }
     
     public async Task<OrderResponse> GetOrder(Guid orderId)
@@ -121,7 +119,7 @@ public class OrdersService : IOrdersService
         
         //await responsesStorage.DeleteResponseByUd(responseId);
         
-        if (response.Status == ResponseStatuses.Approved) {}
+        //if (response.Status == ResponseStatuses.Approved) {}
             //await ordersStorage.UpdateOrderById(response.OrderId, new updateOrderRequest, WITHFILTER);
 
     }

@@ -12,5 +12,6 @@ public class QuickJobContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Order>();
+        modelBuilder.Entity<Response>();
     }
 }

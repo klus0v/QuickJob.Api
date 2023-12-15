@@ -5,7 +5,7 @@ using Vostok.Logging.Abstractions;
 
 namespace QuickJob.BusinessLogic.Storages.Implementations;
 
-public class OrdersStorage : IOrdersStorage
+public sealed class OrdersStorage : IOrdersStorage
 {
     private readonly Func<QuickJobContext> dbContextFactory;
     private readonly ILog log;
@@ -45,5 +45,24 @@ public class OrdersStorage : IOrdersStorage
             return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
         }
        
+    }
+
+    public async Task<EntityResult> CreateOrder(Order order)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            await dbContext
+                .Set<Order>()
+                .AddAsync(order);
+            await dbContext.SaveChangesAsync();
+
+            return EntityResult.CreateSuccessful();
+        }
+        catch (Exception e)
+        {
+            log.Error($"Create order: '{order.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
     }
 }

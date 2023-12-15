@@ -10,7 +10,7 @@ public class ResponseResponse
         OrderId = resp.OrderId;
         UserId = resp.UserId;
         UserFio = resp.UserFio;
-        Status = resp.Status;
+        Status = resp.Status.ToString();
     }
 
     public ResponseResponse()
@@ -22,5 +22,5 @@ public class ResponseResponse
     public Guid UserId { get; set; }
     public Guid OrderId { get; set; }
     public string UserFio { get; set; }
-    public ResponseStatuses Status { get; set; } 
+    public string Status { get; set; } 
 }

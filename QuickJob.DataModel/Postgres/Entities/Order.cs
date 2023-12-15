@@ -8,6 +8,15 @@ namespace QuickJob.DataModel.Postgres.Entities;
 [Index(nameof(CustomerId))]
 public class Order
 {
+    public Order(CreateOrderRequest createOrderRequest, Guid userId)
+    {
+        Id = Guid.NewGuid();
+        CustomerId = userId;
+        Title = createOrderRequest.Title;
+        Limit = createOrderRequest.Limit;
+        Price = createOrderRequest.Price;
+    }
+    
     public Order(CreateOrderRequest createOrderRequest)
     {
         Title = createOrderRequest.Title;

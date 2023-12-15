@@ -5,7 +5,7 @@ using Vostok.Logging.Abstractions;
 
 namespace QuickJob.BusinessLogic.Storages.Implementations;
 
-public class ResponsesStorage : IResponsesStorage
+public sealed class ResponsesStorage : IResponsesStorage
 {
     private readonly Func<QuickJobContext> dbContextFactory;
     private readonly ILog log;
