@@ -16,12 +16,6 @@ namespace QuickJob.DataModel.Postgres.Entities
 
         public bool HasErrorCode(int code) => !IsSuccessful && ErrorResult.ErrorCode.Equals(code);
 
-        public void EnsureSuccess()
-        {
-            if(!IsSuccessful)
-                throw new CustomException(ErrorResult.ErrorMessage, ErrorResult.ErrorCode);
-        }
-
         public static EntityResult CreateSuccessful() => successfulResult;
         public static EntityResult CreateError(ErrorResult error) => new(error);
     }

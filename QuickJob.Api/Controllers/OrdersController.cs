@@ -25,8 +25,7 @@ public class OrdersController : ControllerBase
         var order = await ordersService.CreateOrder(createOrderRequest);
         return Ok(order);
     }
-    
-    [AllowAnonymous]
+
     [HttpGet("{orderId}")]
     public async Task<IActionResult> Get(Guid orderId)
     {

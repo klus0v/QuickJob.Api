@@ -16,8 +16,22 @@ public class ResponsesStorage : IResponsesStorage
         dbContextFactory = () => new QuickJobContext(dbContextOptions);
     }
 
-    public async Task<EntityResult<List<Response>>> GetResponsesByOrderId(Guid orderId)
+    public async Task<EntityResult<IReadOnlyList<Response>>> GetResponsesByOrderId(Guid orderId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            var responses = await dbContext
+                .Set<Response>()
+                .Where(s => s.OrderId == orderId)
+                .ToListAsync();
+
+            return EntityResult<IReadOnlyList<Response>>.CreateSuccessful(responses);
+        }
+        catch (Exception e)
+        {
+            log.Error($"Get responses for order: '{orderId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<IReadOnlyList<Response>>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
     }
 }

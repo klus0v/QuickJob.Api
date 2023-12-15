@@ -14,6 +14,11 @@ public class Order
         Limit = createOrderRequest.Limit;
         Price = createOrderRequest.Price;
     }
+    
+    public Order()
+    {
+        
+    }
 
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }

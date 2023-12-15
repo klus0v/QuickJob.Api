@@ -1,4 +1,3 @@
-using System.ComponentModel.Design;
 using System.Net;
 using QuickJob.BusinessLogic.Storages;
 using QuickJob.DataModel.Api;
@@ -39,19 +38,21 @@ public class OrdersService : IOrdersService
     {
         var orderResult = await ordersStorage.GetOrderById(orderId);
         if (!orderResult.IsSuccessful)
-            throw new CustomException($"Ошибка получения заказа: '{orderId}'", 500);
-        var order = orderResult.Response;
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+        if (orderResult.Response == null)
+            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(orderId) );
         
+        var order = orderResult.Response;
         var userId = RequestContext.ClientInfo.UserId;
         if (!order.IsActive && order.CustomerId != userId)
-            throw new HttpRequestException("Order not found", null, HttpStatusCode.NotFound);
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
         var orderResponse = new OrderResponse(order);
         if (order.CustomerId == userId)
         {
             var responsesResult = await responsesStorage.GetResponsesByOrderId(orderId);
             if (!responsesResult.IsSuccessful)
-                throw new CustomException($"Ошибка получения ответов для заказа: '{orderId}'", 500);
+                throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
             orderResponse.Responses = responsesResult.Response.Select(resp => new ResponseResponse(resp));
         }
         
@@ -66,7 +67,7 @@ public class OrdersService : IOrdersService
             
         };
         if (order.CustomerId != RequestContext.ClientInfo.UserId)
-            throw new CheckoutException("Нет прав на редактирование", 403);
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
         //await ordersStorage.UpdateOrderById(orderId, updateOrderRequest);
         return order;
@@ -80,7 +81,7 @@ public class OrdersService : IOrdersService
             
         };
         if (order.CustomerId != RequestContext.ClientInfo.UserId)
-            throw new CheckoutException("Нет прав на удаление", 403);
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
         //await ordersStorage.DeleteOrderById(orderId);
     }
@@ -102,9 +103,10 @@ public class OrdersService : IOrdersService
             
         };
         if (order.CustomerId == RequestContext.ClientInfo.UserId)
-            throw new CheckoutException("Нельзя откликнутся на свой заказ", 403);
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
         if (order.ResponsesCount == order.Limit)
-            throw new CheckoutException("Заказ заполнен", 409);
+            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
+
         
         //await responsesStorage.AddResponse(orderId, RequestContext.ClientInfo.UserId);
     }
@@ -134,7 +136,7 @@ public class OrdersService : IOrdersService
             
         };
         if (responseStatus == ResponseStatuses.Approved && order.ResponsesCount == order.Limit)
-            throw new CheckoutException("Заказ заполнен", 409);
+            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
         
         //await responsesStorage.UpdateResponse(responseId, responseStatus);
         if (responseStatus == ResponseStatuses.Rejected)

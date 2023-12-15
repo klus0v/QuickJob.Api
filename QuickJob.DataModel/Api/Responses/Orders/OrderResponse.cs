@@ -14,7 +14,6 @@ public sealed class OrderResponse : BaseOrder
         Title = order.Title;
         Limit = order.Limit;
         Price = order.Price;
-        Responses = new List<ResponseResponse>();
     }
 
     public OrderResponse()
@@ -25,5 +24,5 @@ public sealed class OrderResponse : BaseOrder
     public Guid Id { get; set; }
     public int ResponsesCount { get; set; }
     public Guid CustomerId { get; set; }
-    public IEnumerable<ResponseResponse> Responses { get; set; }
+    public IEnumerable<ResponseResponse>? Responses { get; set; }
 }

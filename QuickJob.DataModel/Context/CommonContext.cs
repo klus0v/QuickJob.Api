@@ -27,7 +27,7 @@ public static class CommonContext
             return metricsContext;
         }
 
-        metricsContext = defaultValue ?? throw new Exception("Невозможно получить объект контекста: объект не определён " + entityType.FullName);
+        metricsContext = defaultValue ?? throw new Exception("Impossible get context: object is not defined " + entityType.FullName);
         context[entityType] = metricsContext;
         return metricsContext;
     }
@@ -47,6 +47,6 @@ public static class CommonContext
             return context;
         }
 
-        throw new KeyNotFoundException("CommonContext не инициализирован");
+        throw new KeyNotFoundException("CommonContext does not init");
     }
 }

@@ -51,12 +51,12 @@ internal static class ServiceCollectionExtensions
             });
     }
     
-    public static IServiceCollection AddPostgresStorage(this IServiceCollection services)
+    public static void AddPostgresStorage(this IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
         var postgresSettings = serviceProvider.GetRequiredService<IConfigurationProvider>().Get<PostgresSettings>();
-        
-        return services.AddDbContext<QuickJobContext>(
+
+        services.AddDbContext<QuickJobContext>(
                 options => options
                     .UseNpgsql(postgresSettings.DbConnectionString),
                 optionsLifetime: ServiceLifetime.Singleton)
@@ -65,7 +65,17 @@ internal static class ServiceCollectionExtensions
     
     public static void AddServiceSwaggerDocument(this IServiceCollection services)
     {
-        
+        services.AddSwaggerDocument(doc =>
+        {
+            doc.Title = "QuickJob.Api";
+            doc.AddSecurity("Bearer", Enumerable.Empty<string>(), new NSwag.OpenApiSecurityScheme
+            {
+                Type = NSwag.OpenApiSecuritySchemeType.ApiKey,
+                Name = "Authorization",
+                In = NSwag.OpenApiSecurityApiKeyLocation.Header,
+                Description = "Type into the textbox: Bearer {your JWT token}."
+            });
+        });
     }
 
     public static void AddSettings(this IServiceCollection services)

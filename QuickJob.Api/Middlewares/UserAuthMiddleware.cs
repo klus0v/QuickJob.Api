@@ -1,8 +1,8 @@
 using QuickJob.BusinessLogic.Extensions;
-using Vostok.Logging.Abstractions;
 using QuickJob.DataModel.Context;
+using Vostok.Logging.Abstractions;
 
-namespace QuickJob.Api.Authentication;
+namespace QuickJob.Api.Middlewares;
 
 internal sealed class UserAuthMiddleware
 {
