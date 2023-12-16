@@ -1,4 +1,4 @@
-namespace QuickJob.DataModel.Api;
+namespace QuickJob.DataModel.Api.Responses.Responses;
 
 public enum ResponseStatuses
 {

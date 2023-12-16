@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using QuickJob.BusinessLogic.Services;
 using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
+using QuickJob.DataModel.Api.Responses.Orders;
+using QuickJob.DataModel.Api.Responses.Responses;
 
 namespace QuickJob.Api.Controllers;
 

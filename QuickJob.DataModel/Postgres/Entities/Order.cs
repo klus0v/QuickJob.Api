@@ -1,6 +1,8 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using QuickJob.DataModel.Api.Requests.Orders;
+using QuickJob.DataModel.Api.Responses.Orders;
 
 namespace QuickJob.DataModel.Postgres.Entities;
 
@@ -13,14 +15,15 @@ public class Order
         Id = Guid.NewGuid();
         CustomerId = userId;
         Title = createOrderRequest.Title;
+        Description = createOrderRequest.Description;
+        Address = createOrderRequest.Address;
+        Categories = createOrderRequest.Categories ?? null;
+        Skills = createOrderRequest.Skills ?? null;
+        StartDateTime = createOrderRequest.StartDateTime;
+        EndDateTime = createOrderRequest.EndDateTime;
         Limit = createOrderRequest.Limit;
-        Price = createOrderRequest.Price;
-    }
-    
-    public Order(CreateOrderRequest createOrderRequest)
-    {
-        Title = createOrderRequest.Title;
-        Limit = createOrderRequest.Limit;
+        PaymentType = createOrderRequest.PaymentType;
+        WorkHours = createOrderRequest.WorkHours;
         Price = createOrderRequest.Price;
     }
     
@@ -29,14 +32,34 @@ public class Order
         
     }
 
+    [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public Guid Id { get; set; }
+    
     public string Title { get; set; }
+    
+    public string Description { get; set; }
+    public string Address { get; set; }
+    
+    [Column(TypeName = "text[]")]
+    public List<string>? Categories { get; set; }
+
+    public List<string>? Skills { get; set; }
+    
+    public DateTime StartDateTime { get; set; }
+    public DateTime EndDateTime { get; set; }
     public int Limit { get; set; }
+    public PaymentTypes PaymentType { get; set; }
+    public double WorkHours { get; set; }
+    
     public bool IsActive { get; set; } = true;
+    
     public double Price { get; set; }
+    
     public Guid CustomerId { get; set; }
+    
     public int ResponsesCount { get; set; }
+    
     [Column(TypeName = "text[]")]
     public List<string> FileUrls { get; set; } 
 }
