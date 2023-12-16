@@ -38,5 +38,6 @@ public sealed class OrderResponse : BaseOrder
     public List<string> FileUrls { get;  set; } 
     public bool IsActive { get;  set; } 
     public string PaymentType { get;  set; } 
+    public bool CurrentUserIsCustomer { get;  set; } 
 
 }

@@ -61,7 +61,9 @@ public sealed class QuickJobService : IQuickJobService
             var responsesResult = await responsesStorage.GetResponsesByOrderId(orderId);
             if (!responsesResult.IsSuccessful)
                 throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
-            orderResponse.Responses = responsesResult.Response.Select(resp => new ResponseResponse(resp));
+            if (responsesResult.Response.Count != 0)
+                orderResponse.Responses = responsesResult.Response.Select(resp => new ResponseResponse(resp));
+            orderResponse.CurrentUserIsCustomer = true;
         }
         
         return orderResponse;
