@@ -1,13 +1,12 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using QuickJob.Api.Middlewares;
 using QuickJob.BusinessLogic.Services;
 using QuickJob.BusinessLogic.Services.Implementations;
 using QuickJob.BusinessLogic.Storages;
 using QuickJob.BusinessLogic.Storages.Implementations;
 using QuickJob.DataModel.Configuration;
-using QuickJob.DataModel.Context;
 using QuickJob.DataModel.Postgres;
 using Vostok.Configuration.Sources.Json;
 using Vostok.Logging.Abstractions;
@@ -35,6 +34,9 @@ internal static class ServiceCollectionExtensions
                     .AllowAnyHeader()));
     }
     
+    public static void UseServiceCors(this IApplicationBuilder builder) => 
+        builder.UseCors(FrontSpecificOrigins);
+
     public static void AddServiceAuthentication(this IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
@@ -50,20 +52,6 @@ internal static class ServiceCollectionExtensions
                 options.RequireHttpsMetadata = false;
                 options.Authority = keycloackSettings.Authority;
                 options.Audience = keycloackSettings.Audience;
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = c =>
-                    {
-                        var userIdClaim = c.Principal.Claims.FirstOrDefault(x => x.Type == keycloackSettings.SubClaim);
-                        if (userIdClaim != null)
-                        {
-                            RequestContext.ClientInfo.IsUserAuthenticated = true;
-                            RequestContext.ClientInfo.UserId = Guid.Parse(userIdClaim.Value);
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
             });
     }
     
@@ -123,4 +111,13 @@ internal static class ServiceCollectionExtensions
             .AddSingleton<SmtpClientFactory>()
             .TryAddSingleton(x => x.GetRequiredService<SmtpClientFactory>().GetClient());
     }
+    
+    public static void AddAuthMiddleware(this IServiceCollection services) =>
+        services.AddSingleton<UserAuthMiddleware>();
+
+    public static void UseAuthMiddleware(this IApplicationBuilder builder) =>
+        builder.UseMiddleware<UserAuthMiddleware>();
+
+    public static void UseUnhandledExceptionMiddleware(this IApplicationBuilder builder) => 
+        builder.UseMiddleware<UnhandledExceptionMiddleware>();
 }
