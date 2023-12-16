@@ -4,7 +4,7 @@ using QuickJob.DataModel.Api.Responses.Orders;
 
 namespace QuickJob.BusinessLogic.Services;
 
-public interface IOrdersService
+public interface IQuickJobService
 {
     Task<OrderResponse> CreateOrder(CreateOrderRequest createOrderRequest);
     Task<OrderResponse> GetOrder(Guid orderId);

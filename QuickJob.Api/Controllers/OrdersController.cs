@@ -11,45 +11,45 @@ namespace QuickJob.Api.Controllers;
 [Route("[controller]")]
 public class OrdersController : ControllerBase
 {
-    private readonly IOrdersService ordersService;
+    private readonly IQuickJobService quickJobService;
 
-    public OrdersController(IOrdersService ordersService)
+    public OrdersController(IQuickJobService quickJobService)
     {
-        this.ordersService = ordersService;
+        this.quickJobService = quickJobService;
     }
     
     [HttpPost]
-    public async Task<IActionResult> Create(CreateOrderRequest createOrderRequest)
+    public async Task<IActionResult> Create([FromForm]CreateOrderRequest createOrderRequest)
     {
-        var order = await ordersService.CreateOrder(createOrderRequest);
+        var order = await quickJobService.CreateOrder(createOrderRequest);
         return Ok(order);
     }
 
     [HttpGet("{orderId}")]
     public async Task<IActionResult> Get(Guid orderId)
     {
-        var order = await ordersService.GetOrder(orderId);
+        var order = await quickJobService.GetOrder(orderId);
         return Ok(order);
     }
     
     [HttpPatch("{orderId}")]
     public async Task<IActionResult> Update(Guid orderId, UpdateOrderRequest updateOrderRequest)
     {
-        var order = await ordersService.UpdateOrder(orderId, updateOrderRequest);
+        var order = await quickJobService.UpdateOrder(orderId, updateOrderRequest);
         return Ok(order);
     }
     
     [HttpDelete("{orderId}")]
     public async Task<IActionResult> Delete(Guid orderId)
     {
-        await ordersService.DeleteOrder(orderId);
+        await quickJobService.DeleteOrder(orderId);
         return Ok();
     }
     
     [HttpGet]
     public async Task<IActionResult> Search(SearchOrdersRequest searchOrdersRequest)
     {
-        var orders = await ordersService.SearchOrders(searchOrdersRequest);
+        var orders = await quickJobService.SearchOrders(searchOrdersRequest);
         return Ok(orders);
     }
 
@@ -58,14 +58,14 @@ public class OrdersController : ControllerBase
     [HttpPut("{orderId}/responses")]
     public async Task<IActionResult> RespondToOrder(Guid orderId)
     {
-        await ordersService.RespondToOrder(orderId);
+        await quickJobService.RespondToOrder(orderId);
         return Ok();
     }
     
     [HttpDelete("{orderId}/responses/{responseId}")]
     public async Task<IActionResult> DeleteRespondToOrder(Guid responseId)
     {
-        await ordersService.DeleteRespondToOrder(responseId);
+        await quickJobService.DeleteRespondToOrder(responseId);
         return Ok();
     }
     
@@ -76,14 +76,14 @@ public class OrdersController : ControllerBase
     [HttpPut("{orderId}/responses/{responseId}/approve")]
     public async Task<IActionResult> ApproveRespondToOrder(Guid responseId)
     {
-        await ordersService.SetRespondStatus(responseId, ResponseStatuses.Approved);
+        await quickJobService.SetRespondStatus(responseId, ResponseStatuses.Approved);
         return Ok();
     }
     
     [HttpPut("{orderId}/responses/{responseId}/reject")]
     public async Task<IActionResult> RejectRespondToOrder(Guid responseId)
     {
-        await ordersService.SetRespondStatus(responseId, ResponseStatuses.Rejected);
+        await quickJobService.SetRespondStatus(responseId, ResponseStatuses.Rejected);
         return Ok();
     }
     
@@ -92,7 +92,7 @@ public class OrdersController : ControllerBase
     [HttpGet("history")]
     public async Task<IActionResult> GetHistory([FromQuery] HistoryTypes historyType = HistoryTypes.All)
     {
-        var orders = await ordersService.GetOrdersHistory(historyType);
+        var orders = await quickJobService.GetOrdersHistory(historyType);
         return Ok(orders);
     }
 }

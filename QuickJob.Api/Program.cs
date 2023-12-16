@@ -20,7 +20,7 @@ var app = builder.Build();
 
 //app.UseDeveloperExceptionPage()
 app.UseUnhandledExceptionMiddleware();
-app.UseSwaggerUi3().UseOpenApi();
+app.UseSwaggerUi().UseOpenApi();
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseServiceCors();

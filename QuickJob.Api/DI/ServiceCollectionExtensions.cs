@@ -6,6 +6,7 @@ using QuickJob.BusinessLogic.Services;
 using QuickJob.BusinessLogic.Services.Implementations;
 using QuickJob.BusinessLogic.Storages;
 using QuickJob.BusinessLogic.Storages.Implementations;
+using QuickJob.BusinessLogic.Storages.S3;
 using QuickJob.DataModel.Configuration;
 using QuickJob.DataModel.Postgres;
 using Vostok.Configuration.Sources.Json;
@@ -86,7 +87,7 @@ internal static class ServiceCollectionExtensions
         var provider = new ConfigurationProvider();
 
         provider.SetupSourceFor<ServiceSettings>(new JsonFileSource("Properties/ServiceSettings.json"));
-        provider.SetupSourceFor<StorageSettings>(new JsonFileSource("Properties/StorageSettings.json"));
+        provider.SetupSourceFor<S3Settings>(new JsonFileSource("Properties/S3Settings.json"));
         provider.SetupSourceFor<PostgresSettings>(new JsonFileSource("Properties/PostgresSettings.json"));
         provider.SetupSourceFor<SmtpSettings>(new JsonFileSource("Properties/SmtpSettings.json"));
         provider.SetupSourceFor<KeycloackSettings>(new JsonFileSource("Properties/KeycloackSettings.json"));
@@ -96,17 +97,18 @@ internal static class ServiceCollectionExtensions
 
     public static void AddSystemServices(this IServiceCollection services) => services
         .AddDistributedMemoryCache()
-        .AddSingleton<IOrdersService, OrdersService>()
+        .AddSingleton<IQuickJobService, QuickJobService>()
         .AddSingleton<IOrdersStorage, OrdersStorage>()
-        .AddSingleton<IResponsesStorage, ResponsesStorage>();
+        .AddSingleton<IResponsesStorage, ResponsesStorage>()
+        .AddSingleton<IS3Storage, AWSStorage>();
 
     public static void AddExternalServices(this IServiceCollection services)
     {
         services
             .AddSingleton<ILog>(new CompositeLog(new ConsoleLog(), new FileLog(new FileLogSettings())));
         services
-            .AddSingleton<S3ClientFactory>()
-            .TryAddSingleton(x => x.GetRequiredService<S3ClientFactory>().GetClient());
+            .AddSingleton<AWSClientFactory>()
+            .TryAddSingleton(x => x.GetRequiredService<AWSClientFactory>().GetClient());
         services
             .AddSingleton<SmtpClientFactory>()
             .TryAddSingleton(x => x.GetRequiredService<SmtpClientFactory>().GetClient());

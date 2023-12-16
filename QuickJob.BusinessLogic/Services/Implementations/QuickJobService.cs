@@ -1,5 +1,7 @@
 using System.Net;
+using Microsoft.AspNetCore.Http;
 using QuickJob.BusinessLogic.Storages;
+using QuickJob.BusinessLogic.Storages.S3;
 using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
@@ -10,20 +12,28 @@ using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Services.Implementations;
 
-public sealed class OrdersService : IOrdersService
+public sealed class QuickJobService : IQuickJobService
 {
     private readonly IOrdersStorage ordersStorage;
+    private readonly IS3Storage s3Storage;
     private readonly IResponsesStorage responsesStorage;
 
-    public OrdersService(IOrdersStorage ordersStorage, IResponsesStorage responsesStorage)
+    public QuickJobService(
+        IOrdersStorage ordersStorage, 
+        IResponsesStorage responsesStorage, 
+        IS3Storage s3Storage)
     {
         this.ordersStorage = ordersStorage;
         this.responsesStorage = responsesStorage;
+        this.s3Storage = s3Storage;
     }
 
     public async Task<OrderResponse> CreateOrder(CreateOrderRequest createOrderRequest)
     {
         var order = new Order(createOrderRequest, RequestContext.ClientInfo.UserId);
+        
+        if (createOrderRequest.Files != null) 
+            order.FileUrls = await UploadFiles(createOrderRequest.Files);
 
         var createResult = await ordersStorage.CreateOrder(order);
         if (!createResult.IsSuccessful)
@@ -174,5 +184,15 @@ public sealed class OrdersService : IOrdersService
     {
         //var customerOrders = ordersStorage.GetOrdersByUserId(RequestContext.ClientInfo.UserId)
         throw new NotImplementedException();
+    }
+    
+    private async Task<List<string>> UploadFiles(List<IFormFile> files)
+    {
+        var s3Result = await s3Storage.UploadFiles(files);
+
+        if (!s3Result.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.AWS(s3Result.ErrorResult.ErrorMessage));
+        
+        return s3Result.Response;
     }
 }

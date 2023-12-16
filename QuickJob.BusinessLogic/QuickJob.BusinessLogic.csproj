@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AWSSDK.S3" Version="3.7.304.7" />
         <PackageReference Include="Vostok.Configuration" Version="0.1.43" />
         <PackageReference Include="Vostok.Configuration.Abstractions" Version="0.1.15" />
         <PackageReference Include="Vostok.Configuration.Sources.Json" Version="0.1.8" />
@@ -16,6 +17,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\QuickJob.DataModel\QuickJob.DataModel.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.Http.Features">
+        <HintPath>..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.0\Microsoft.AspNetCore.Http.Features.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

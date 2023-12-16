@@ -1,6 +1,6 @@
+using QuickJob.DataModel.Api.Base;
 using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Postgres.Entities;
-using QuickJob.DataModel.Postgres.Entities.Base;
 
 namespace QuickJob.DataModel.Api.Responses.Orders;
 
@@ -14,6 +14,7 @@ public sealed class OrderResponse : BaseOrder
         Title = order.Title;
         Limit = order.Limit;
         Price = order.Price;
+        FileUrls = order.FileUrls;
     }
 
     public OrderResponse()
@@ -25,4 +26,6 @@ public sealed class OrderResponse : BaseOrder
     public int ResponsesCount { get; set; }
     public Guid CustomerId { get; set; }
     public IEnumerable<ResponseResponse>? Responses { get; set; }
+    public List<string> FileUrls { get;  set; } 
+
 }

@@ -1,4 +1,4 @@
-namespace QuickJob.DataModel.Postgres.Entities.Base;
+namespace QuickJob.DataModel.Api.Base;
 
 public class BaseOrder
 {

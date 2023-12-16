@@ -37,5 +37,6 @@ public class Order
     public double Price { get; set; }
     public Guid CustomerId { get; set; }
     public int ResponsesCount { get; set; }
-
+    [Column(TypeName = "text[]")]
+    public List<string> FileUrls { get; set; } 
 }

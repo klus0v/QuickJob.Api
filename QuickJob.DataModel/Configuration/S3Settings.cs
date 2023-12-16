@@ -1,6 +1,6 @@
 ﻿namespace QuickJob.DataModel.Configuration;
 
-public class StorageSettings
+public class S3Settings
 {
     public string AccessKeyId { get; set; }
     public string SecretKey { get; set; }
