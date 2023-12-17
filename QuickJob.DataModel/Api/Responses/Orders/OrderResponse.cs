@@ -10,10 +10,12 @@ public sealed class OrderResponse
     }
 
     public Guid Id { get; set; }
-    public int ResponsesCount { get; set; }
+    public int ApprovedResponsesCount { get; set; }
+    public int TotalResponsesCount { get; set; }
     public Guid CustomerId { get; set; }
     public IEnumerable<ResponseResponse>? Responses { get; set; }
-    public List<string> FileUrls { get;  set; } 
+    public string? ResponseStatus { get; set; }
+    public List<string>? FileUrls { get;  set; } 
     public bool IsActive { get;  set; } 
     public string PaymentType { get;  set; } 
     public bool CurrentUserIsCustomer { get;  set; }

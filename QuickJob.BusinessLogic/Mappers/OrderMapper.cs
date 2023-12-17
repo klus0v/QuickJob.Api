@@ -12,7 +12,8 @@ public static class OrderMapper
         {
             Id = order.Id,
             CustomerId = order.CustomerId,
-            ResponsesCount = order.ResponsesCount,
+            ApprovedResponsesCount = order.ApprovedResponsesCount,
+            TotalResponsesCount = order.Responses == null ? 0 : order.Responses.Count,
             Title = order.Title,
             Description = order.Description,
             Address = order.Address,
@@ -51,36 +52,34 @@ public static class OrderMapper
         };
     }
     
-    public static Order ToEntity(this UpdateOrderRequest updateOrderRequest, Guid orderId)
+    public static Order Update(this Order order, UpdateOrderRequest request)
     {
-        var order = new Order
-        {
-            Id = orderId, 
-            EditDateTime = DateTime.UtcNow
-        };
+        order.EditDateTime = DateTime.UtcNow;
         
-        if (updateOrderRequest.Title != null)
-            order.Title = updateOrderRequest.Title;
-        if (updateOrderRequest.Description != null)
-            order.Description = updateOrderRequest.Description;
-        if (updateOrderRequest.Address != null)
-            order.Address = updateOrderRequest.Address;
-        if (updateOrderRequest.Categories != null)
-            order.Categories = updateOrderRequest.Categories;
-        if (updateOrderRequest.Skills != null)
-            order.Skills = updateOrderRequest.Skills;
-        if (updateOrderRequest.StartDateTime != null)
-            order.StartDateTime = (DateTime)updateOrderRequest.StartDateTime;
-        if (updateOrderRequest.EndDateTime != null)
-            order.EndDateTime = (DateTime)updateOrderRequest.EndDateTime;
-        if (updateOrderRequest.Limit != null)
-            order.Limit = (int)updateOrderRequest.Limit;
-        if (updateOrderRequest.PaymentType != null)
-            order.PaymentType = (PaymentTypes)updateOrderRequest.PaymentType;
-        if (updateOrderRequest.WorkHours != null)
-            order.WorkHours = (double)updateOrderRequest.WorkHours;
-        if (updateOrderRequest.Price != null)
-            order.Price = (double)updateOrderRequest.Price;
+        if (request.Title != null)
+            order.Title = request.Title;
+        if (request.Description != null)
+            order.Description = request.Description;
+        if (request.Address != null)
+            order.Address = request.Address;
+        if (request.Categories != null)
+            order.Categories = request.Categories;
+        if (request.Skills != null)
+            order.Skills = request.Skills;
+        if (request.StartDateTime != null)
+            order.StartDateTime = (DateTime)request.StartDateTime;
+        if (request.EndDateTime != null)
+            order.EndDateTime = (DateTime)request.EndDateTime;
+        if (request.Limit != null)
+            order.Limit = (int)request.Limit;
+        if (request.PaymentType != null)
+            order.PaymentType = (PaymentType)request.PaymentType;
+        if (request.WorkHours != null)
+            order.WorkHours = (double)request.WorkHours;
+        if (request.Price != null)
+            order.Price = (double)request.Price;
+        if (request.FileUrls?.Count != 0)
+            order.FileUrls = request.FileUrls;
 
         return order;
     }

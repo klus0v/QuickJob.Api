@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
 
 namespace QuickJob.DataModel.Postgres.Entities;
@@ -22,9 +23,7 @@ public class Order
     public string Description { get; set; }
     
     public string Address { get; set; }
-    
-    
-    [Column(TypeName = "text[]")]
+
     public List<string>? Categories { get; set; }
 
     public List<string>? Skills { get; set; }
@@ -35,7 +34,7 @@ public class Order
     
     public int Limit { get; set; }
     
-    public PaymentTypes PaymentType { get; set; }
+    public PaymentType PaymentType { get; set; }
     
     public double WorkHours { get; set; }
     
@@ -45,13 +44,13 @@ public class Order
     
     public Guid CustomerId { get; set; }
     
-    public int ResponsesCount { get; set; }
+    public int ApprovedResponsesCount { get; set; }
     
-    
-    [Column(TypeName = "text[]")]
-    public List<string> FileUrls { get; set; } 
+    public List<string>? FileUrls { get; set; } 
     
     public DateTime CreateDateTime { get; set; }
     
     public DateTime? EditDateTime { get; set; }
+    
+    public List<Response> Responses { get; set; }
 }

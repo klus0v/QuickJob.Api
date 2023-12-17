@@ -1,6 +1,6 @@
 namespace QuickJob.DataModel.Api.Responses.Orders;
 
-public enum HistoryTypes
+public enum HistoryType
 {
     Worker,
     Customer,

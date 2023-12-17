@@ -32,8 +32,14 @@ namespace QuickJob.DataModel.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("ApprovedResponsesCount")
+                        .HasColumnType("integer");
+
                     b.Property<List<string>>("Categories")
                         .HasColumnType("text[]");
+
+                    b.Property<DateTime>("CreateDateTime")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uuid");
@@ -42,11 +48,13 @@ namespace QuickJob.DataModel.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime?>("EditDateTime")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("EndDateTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<List<string>>("FileUrls")
-                        .IsRequired()
                         .HasColumnType("text[]");
 
                     b.Property<bool>("IsActive")
@@ -60,9 +68,6 @@ namespace QuickJob.DataModel.Migrations
 
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
-
-                    b.Property<int>("ResponsesCount")
-                        .HasColumnType("integer");
 
                     b.Property<List<string>>("Skills")
                         .HasColumnType("text[]");
@@ -114,12 +119,17 @@ namespace QuickJob.DataModel.Migrations
             modelBuilder.Entity("QuickJob.DataModel.Postgres.Entities.Response", b =>
                 {
                     b.HasOne("QuickJob.DataModel.Postgres.Entities.Order", "Order")
-                        .WithMany()
+                        .WithMany("Responses")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("QuickJob.DataModel.Postgres.Entities.Order", b =>
+                {
+                    b.Navigation("Responses");
                 });
 #pragma warning restore 612, 618
         }

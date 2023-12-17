@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace QuickJob.DataModel.Migrations
 {
     /// <inheritdoc />
-    public partial class fisrtMigration : Migration
+    public partial class fullOrderModel2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,8 +30,10 @@ namespace QuickJob.DataModel.Migrations
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     Price = table.Column<double>(type: "double precision", nullable: false),
                     CustomerId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ResponsesCount = table.Column<int>(type: "integer", nullable: false),
-                    FileUrls = table.Column<List<string>>(type: "text[]", nullable: false)
+                    ApprovedResponsesCount = table.Column<int>(type: "integer", nullable: false),
+                    FileUrls = table.Column<List<string>>(type: "text[]", nullable: true),
+                    CreateDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    EditDateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {

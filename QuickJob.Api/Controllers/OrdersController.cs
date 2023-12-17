@@ -36,7 +36,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpPatch("{orderId}")]
-    public async Task<IActionResult> Update(Guid orderId, UpdateOrderRequest updateOrderRequest)
+    public async Task<IActionResult> Update(Guid orderId, [FromForm] UpdateOrderRequest updateOrderRequest)
     {
         var order = await quickJobService.UpdateOrder(orderId, updateOrderRequest);
         return Ok(order);
@@ -50,14 +50,14 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> Search(SearchOrdersRequest searchOrdersRequest)
+    public async Task<IActionResult> Search([FromQuery] SearchOrdersRequest searchOrdersRequest)
     {
         var orders = await quickJobService.SearchOrders(searchOrdersRequest);
         return Ok(orders);
     }
     
     [HttpGet("history")]
-    public async Task<IActionResult> GetHistory([FromQuery] HistoryTypes historyType = HistoryTypes.All)
+    public async Task<IActionResult> GetHistory([FromQuery] HistoryType historyType = HistoryType.All)
     {
         var orders = await quickJobService.GetOrdersHistory(historyType);
         return Ok(orders);
@@ -88,14 +88,14 @@ public class OrdersController : ControllerBase
     [HttpPut("{orderId}/responses/{responseId}/approve")]
     public async Task<IActionResult> ApproveRespondToOrder(Guid responseId)
     {
-        await quickJobService.SetRespondStatus(responseId, ResponseStatuses.Approved);
+        await quickJobService.SetRespondStatus(responseId, ResponseStatus.Approved);
         return Ok();
     }
     
     [HttpPut("{orderId}/responses/{responseId}/reject")]
     public async Task<IActionResult> RejectRespondToOrder(Guid responseId)
     {
-        await quickJobService.SetRespondStatus(responseId, ResponseStatuses.Rejected);
+        await quickJobService.SetRespondStatus(responseId, ResponseStatus.Rejected);
         return Ok();
     }
     

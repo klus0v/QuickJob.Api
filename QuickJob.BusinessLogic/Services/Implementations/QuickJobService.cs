@@ -14,8 +14,8 @@ namespace QuickJob.BusinessLogic.Services.Implementations;
 public sealed class QuickJobService : IQuickJobService
 {
     private readonly IOrdersStorage ordersStorage;
-    private readonly IS3Storage s3Storage;
     private readonly IResponsesStorage responsesStorage;
+    private readonly IS3Storage s3Storage;
 
     public QuickJobService(
         IOrdersStorage ordersStorage, 
@@ -38,7 +38,9 @@ public sealed class QuickJobService : IQuickJobService
         if (!createResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(createResult.ErrorResult.ErrorMessage) );
 
-        return order.ToResponse();
+        var orderResponse =  order.ToResponse();
+        orderResponse.CurrentUserIsCustomer = true;
+        return orderResponse;
     }
     
     public async Task<OrderResponse> GetOrder(Guid orderId)
@@ -50,21 +52,22 @@ public sealed class QuickJobService : IQuickJobService
             throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(orderId) );
         
         var order = orderResult.Response;
-        var userId = RequestContext.ClientInfo.UserId;
-        if (!order.IsActive && order.CustomerId != userId)
+        var currentUserId = RequestContext.ClientInfo.UserId;
+        if (!order.IsActive && order.CustomerId != currentUserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
         var orderResponse = order.ToResponse();
-        if (order.CustomerId == userId)
+        if (order.CustomerId == currentUserId)
         {
-            var responsesResult = await responsesStorage.GetResponsesByOrderId(orderId);
-            if (!responsesResult.IsSuccessful)
-                throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
-            if (responsesResult.Response.Count != 0)
-                orderResponse.Responses = responsesResult.Response.Select(resp => new ResponseResponse(resp));
+            if (order.Responses.Count != 0)
+                orderResponse.Responses = order.Responses.Select(resp => new ResponseResponse(resp));
             orderResponse.CurrentUserIsCustomer = true;
+            return orderResponse;
         }
-        
+        var currentUserResponse = order.Responses.FirstOrDefault(o => o.UserId == currentUserId);
+        if (currentUserResponse != null) 
+            orderResponse.ResponseStatus = currentUserResponse.Status.ToString();
+
         return orderResponse;
     }
 
@@ -83,10 +86,10 @@ public sealed class QuickJobService : IQuickJobService
             updateOrderRequest.NewFiles = null;
         }
         
-        var order = updateOrderRequest.ToEntity(orderId);
+        var order = orderResult.Response.Update(updateOrderRequest);
         var updateResult = await ordersStorage.UpdateOrder(order);
         if (!updateResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(updateResult.ErrorResult.ErrorMessage) );
         return order.ToResponse();
     }
 
@@ -98,20 +101,40 @@ public sealed class QuickJobService : IQuickJobService
         if (orderResult.Response.CustomerId != RequestContext.ClientInfo.UserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
-        //todo await responsesStorage.DeleteByIdOrderId(orderId);
         var deleteResult = await ordersStorage.DeleteOrderById(orderResult.Response);
         if (!deleteResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(deleteResult.ErrorResult.ErrorMessage) );
     }
 
-    public async Task<SearchOrdersResponse> SearchOrders(SearchOrdersRequest searchOrdersRequest)
+    public async Task<List<OrderResponse>> SearchOrders(SearchOrdersRequest searchOrdersRequest)
     {
-        //var orders = await ordersStorage.SearchOrders(searchOrdersRequest);
-        return new SearchOrdersResponse
-        {
+        var searchResult = await ordersStorage.SearchOrders(searchOrdersRequest);
+        if (!searchResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(searchResult.ErrorResult.ErrorMessage) );
 
-        };
+        return searchResult.Response.Select(x => x.ToResponse()).ToList();
     }
+    
+    public async Task<SearchOrdersResponse> GetOrdersHistory(HistoryType historyType)
+    {
+        var orders = new SearchOrdersResponse();
+        switch (historyType)
+        {
+            case HistoryType.All:
+                await AddCustomerOrders(orders);
+                await AddWorkerOrders(orders);
+                break;
+            case HistoryType.Customer:
+                await AddCustomerOrders(orders);
+                break;
+            case HistoryType.Worker:
+                await AddWorkerOrders(orders);
+                break;
+        }
+        return orders;
+    }
+
+    #region Workers
 
     public async Task RespondToOrder(Guid orderId)
     {
@@ -122,7 +145,7 @@ public sealed class QuickJobService : IQuickJobService
         };
         if (order.CustomerId == RequestContext.ClientInfo.UserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
-        if (order.ResponsesCount == order.Limit)
+        if (order.ApprovedResponsesCount == order.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
 
         
@@ -139,12 +162,16 @@ public sealed class QuickJobService : IQuickJobService
         
         //await responsesStorage.DeleteResponseByUd(responseId);
         
-        //if (response.Status == ResponseStatuses.Approved) {}
-            //await ordersStorage.UpdateOrderById(response.OrderId, new updateOrderRequest, WITHFILTER);
+        //if (response.Status == ResponseStatus.Approved) {}
+        //await ordersStorage.UpdateOrderById(response.OrderId, new updateOrderRequest, WITHFILTER);
 
     }
 
-    public async Task SetRespondStatus(Guid responseId, ResponseStatuses responseStatus)
+    #endregion
+
+    #region Customers
+
+    public async Task SetRespondStatus(Guid responseId, ResponseStatus responseStatus)
     {
         //var response = await responsesStorage.GetResponse(responseId, RequestContext.ClientInfo.UserId);
         //if response already set - 409
@@ -153,35 +180,19 @@ public sealed class QuickJobService : IQuickJobService
         {
             
         };
-        if (responseStatus == ResponseStatuses.Approved && order.ResponsesCount == order.Limit)
+        if (responseStatus == ResponseStatus.Approved && order.ApprovedResponsesCount == order.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
         
         //await responsesStorage.UpdateResponse(responseId, responseStatus);
-        if (responseStatus == ResponseStatuses.Rejected)
+        if (responseStatus == ResponseStatus.Rejected)
         {
-            order.ResponsesCount--;
+            order.ApprovedResponsesCount--;
             //await ordersStorage.UpdateById(orderId, order);
         }
     }
 
-    public async Task<SearchOrdersResponse> GetOrdersHistory(HistoryTypes historyType)
-    {
-        var orders = new SearchOrdersResponse();
-        switch (historyType)
-        {
-            case HistoryTypes.All:
-                await AddCustomerOrders(orders);
-                await AddWorkerOrders(orders);
-                break;
-            case HistoryTypes.Customer:
-                await AddCustomerOrders(orders);
-                break;
-            case HistoryTypes.Worker:
-                await AddWorkerOrders(orders);
-                break;
-        }
-        return orders;
-    }
+    #endregion
+    
 
     private async Task AddWorkerOrders(SearchOrdersResponse orders)
     {

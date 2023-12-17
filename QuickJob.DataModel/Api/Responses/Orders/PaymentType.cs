@@ -1,6 +1,6 @@
 namespace QuickJob.DataModel.Api.Responses.Orders;
 
-public enum PaymentTypes
+public enum PaymentType
 {
     Cash,
     Card,

@@ -16,7 +16,7 @@ public class Response
     public Guid OrderId { get; set; }
     public Guid UserId { get; set; }
     public string UserFio { get; set; }
-    public ResponseStatuses Status { get; set; }
+    public ResponseStatus Status { get; set; }
     
     // Navigation property for the associated order
     [ForeignKey("OrderId")]

@@ -14,7 +14,7 @@ public sealed class CreateOrderRequest
     public List<string>? Categories { get; set; }
     public List<string>? Skills { get; set; }
     public int Limit { get; set; }
-    public PaymentTypes PaymentType { get; set; }
+    public PaymentType PaymentType { get; set; }
     public double WorkHours { get; set; }
     public double Price { get; set; }
 }

@@ -1,6 +1,6 @@
 namespace QuickJob.DataModel.Api.Responses.Responses;
 
-public enum ResponseStatuses
+public enum ResponseStatus
 {
     Requested,
     Rejected,
