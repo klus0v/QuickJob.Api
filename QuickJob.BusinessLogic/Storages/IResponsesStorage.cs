@@ -1,4 +1,4 @@
-using QuickJob.DataModel.Api.Base;
+using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Storages;

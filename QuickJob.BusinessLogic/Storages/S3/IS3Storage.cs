@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using QuickJob.DataModel.Api.Base;
+using QuickJob.DataModel.Api;
 
 namespace QuickJob.BusinessLogic.Storages.S3;
 

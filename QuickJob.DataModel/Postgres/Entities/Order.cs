@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
 
 namespace QuickJob.DataModel.Postgres.Entities;
@@ -10,26 +9,8 @@ namespace QuickJob.DataModel.Postgres.Entities;
 [Index(nameof(CustomerId))]
 public class Order
 {
-    public Order(CreateOrderRequest createOrderRequest, Guid userId)
-    {
-        Id = Guid.NewGuid();
-        CustomerId = userId;
-        Title = createOrderRequest.Title;
-        Description = createOrderRequest.Description;
-        Address = createOrderRequest.Address;
-        Categories = createOrderRequest.Categories ?? null;
-        Skills = createOrderRequest.Skills ?? null;
-        StartDateTime = createOrderRequest.StartDateTime;
-        EndDateTime = createOrderRequest.EndDateTime;
-        Limit = createOrderRequest.Limit;
-        PaymentType = createOrderRequest.PaymentType;
-        WorkHours = createOrderRequest.WorkHours;
-        Price = createOrderRequest.Price;
-    }
-    
     public Order()
     {
-        
     }
 
     [Key]
@@ -39,7 +20,9 @@ public class Order
     public string Title { get; set; }
     
     public string Description { get; set; }
+    
     public string Address { get; set; }
+    
     
     [Column(TypeName = "text[]")]
     public List<string>? Categories { get; set; }
@@ -47,9 +30,13 @@ public class Order
     public List<string>? Skills { get; set; }
     
     public DateTime StartDateTime { get; set; }
+    
     public DateTime EndDateTime { get; set; }
+    
     public int Limit { get; set; }
+    
     public PaymentTypes PaymentType { get; set; }
+    
     public double WorkHours { get; set; }
     
     public bool IsActive { get; set; } = true;
@@ -60,6 +47,11 @@ public class Order
     
     public int ResponsesCount { get; set; }
     
+    
     [Column(TypeName = "text[]")]
     public List<string> FileUrls { get; set; } 
+    
+    public DateTime CreateDateTime { get; set; }
+    
+    public DateTime? EditDateTime { get; set; }
 }

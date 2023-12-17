@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Http;
-using QuickJob.DataModel.Api.Base;
+using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Configuration;
 using Vostok.Configuration.Abstractions;
 using Vostok.Logging.Abstractions;

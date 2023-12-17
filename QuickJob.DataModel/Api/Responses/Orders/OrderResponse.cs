@@ -1,34 +1,12 @@
-using QuickJob.DataModel.Api.Base;
 using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.DataModel.Api.Responses.Orders;
 
-public sealed class OrderResponse : BaseOrder
+public sealed class OrderResponse
 {
-    public OrderResponse(Order order)
-    {
-        Id = order.Id;
-        CustomerId = order.CustomerId;
-        ResponsesCount = order.ResponsesCount;
-        Title = order.Title;
-        Description = order.Description;
-        Address = order.Address;
-        StartDateTime = order.StartDateTime;
-        EndDateTime = order.EndDateTime;
-        Categories = order.Categories ?? null;
-        Skills = order.Skills ?? null;
-        Limit = order.Limit;
-        PaymentType = order.PaymentType.ToString();
-        WorkHours = order.WorkHours;
-        Price = order.Price;
-        FileUrls = order.FileUrls;
-        IsActive = order.IsActive;
-    }
-
     public OrderResponse()
     {
-        
     }
 
     public Guid Id { get; set; }
@@ -38,6 +16,17 @@ public sealed class OrderResponse : BaseOrder
     public List<string> FileUrls { get;  set; } 
     public bool IsActive { get;  set; } 
     public string PaymentType { get;  set; } 
-    public bool CurrentUserIsCustomer { get;  set; } 
-
+    public bool CurrentUserIsCustomer { get;  set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public string Address { get; set; }
+    public DateTime StartDateTime { get; set; }
+    public DateTime EndDateTime { get; set; }
+    public List<string>? Categories { get; set; }
+    public List<string>? Skills { get; set; }
+    public int Limit { get; set; }
+    public double WorkHours { get; set; }
+    public double Price { get; set; }
+    public DateTime CreateDateTime { get; set; }
+    public DateTime? EditDateTime { get; set; }
 }

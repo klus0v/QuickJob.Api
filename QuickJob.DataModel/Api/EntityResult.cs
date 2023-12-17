@@ -1,4 +1,4 @@
-namespace QuickJob.DataModel.Api.Base;
+namespace QuickJob.DataModel.Api;
 
 public class EntityResult
 {

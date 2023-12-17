@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuickJob.DataModel.Api.Base;
+using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Postgres;
 using QuickJob.DataModel.Postgres.Entities;
 using Vostok.Logging.Abstractions;

@@ -1,14 +1,13 @@
 using System.Net;
 using Microsoft.AspNetCore.Http;
+using QuickJob.BusinessLogic.Mappers;
 using QuickJob.BusinessLogic.Storages;
 using QuickJob.BusinessLogic.Storages.S3;
-using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
 using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Context;
 using QuickJob.DataModel.Exceptions;
-using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Services.Implementations;
 
@@ -30,7 +29,7 @@ public sealed class QuickJobService : IQuickJobService
 
     public async Task<OrderResponse> CreateOrder(CreateOrderRequest createOrderRequest)
     {
-        var order = new Order(createOrderRequest, RequestContext.ClientInfo.UserId);
+        var order = createOrderRequest.ToEntity(RequestContext.ClientInfo.UserId);
         
         if (createOrderRequest.Files != null) 
             order.FileUrls = await UploadFiles(createOrderRequest.Files);
@@ -39,7 +38,7 @@ public sealed class QuickJobService : IQuickJobService
         if (!createResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(createResult.ErrorResult.ErrorMessage) );
 
-        return new OrderResponse(order);
+        return order.ToResponse();
     }
     
     public async Task<OrderResponse> GetOrder(Guid orderId)
@@ -55,7 +54,7 @@ public sealed class QuickJobService : IQuickJobService
         if (!order.IsActive && order.CustomerId != userId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
-        var orderResponse = new OrderResponse(order);
+        var orderResponse = order.ToResponse();
         if (order.CustomerId == userId)
         {
             var responsesResult = await responsesStorage.GetResponsesByOrderId(orderId);
@@ -71,29 +70,38 @@ public sealed class QuickJobService : IQuickJobService
 
     public async Task<OrderResponse> UpdateOrder(Guid orderId, UpdateOrderRequest updateOrderRequest)
     {
-        //var order = await ordersStorage.GetOrderById(orderId);
-        var order = new OrderResponse
-        {
-            
-        };
-        if (order.CustomerId != RequestContext.ClientInfo.UserId)
+        var orderResult = await ordersStorage.GetOrderById(orderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+        if (orderResult.Response.CustomerId != RequestContext.ClientInfo.UserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
-        //await ordersStorage.UpdateOrderById(orderId, updateOrderRequest);
-        return order;
+        if (updateOrderRequest.NewFiles != null)
+        {
+            updateOrderRequest.FileUrls ??= new List<string>();
+            updateOrderRequest.FileUrls.AddRange(await UploadFiles(updateOrderRequest.NewFiles));
+            updateOrderRequest.NewFiles = null;
+        }
+        
+        var order = updateOrderRequest.ToEntity(orderId);
+        var updateResult = await ordersStorage.UpdateOrder(order);
+        if (!updateResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+        return order.ToResponse();
     }
 
     public async Task DeleteOrder(Guid orderId)
     {
-        //var order = await ordersStorage.GetOrderById(orderId);
-        var order = new OrderResponse
-        {
-            
-        };
-        if (order.CustomerId != RequestContext.ClientInfo.UserId)
+        var orderResult = await ordersStorage.GetOrderById(orderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
+        if (orderResult.Response.CustomerId != RequestContext.ClientInfo.UserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
 
-        //await ordersStorage.DeleteOrderById(orderId);
+        //todo await responsesStorage.DeleteByIdOrderId(orderId);
+        var deleteResult = await ordersStorage.DeleteOrderById(orderResult.Response);
+        if (!deleteResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
     }
 
     public async Task<SearchOrdersResponse> SearchOrders(SearchOrdersRequest searchOrdersRequest)

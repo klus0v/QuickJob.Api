@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuickJob.BusinessLogic.Services;
-using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
 using QuickJob.DataModel.Api.Responses.Responses;
@@ -20,6 +19,8 @@ public class OrdersController : ControllerBase
         this.quickJobService = quickJobService;
     }
     
+    #region All
+
     [HttpPost]
     public async Task<IActionResult> Create([FromForm]CreateOrderRequest createOrderRequest)
     {
@@ -54,6 +55,15 @@ public class OrdersController : ControllerBase
         var orders = await quickJobService.SearchOrders(searchOrdersRequest);
         return Ok(orders);
     }
+    
+    [HttpGet("history")]
+    public async Task<IActionResult> GetHistory([FromQuery] HistoryTypes historyType = HistoryTypes.All)
+    {
+        var orders = await quickJobService.GetOrdersHistory(historyType);
+        return Ok(orders);
+    }
+
+    #endregion
 
     #region Workers
     
@@ -90,11 +100,4 @@ public class OrdersController : ControllerBase
     }
     
     #endregion
-    
-    [HttpGet("history")]
-    public async Task<IActionResult> GetHistory([FromQuery] HistoryTypes historyType = HistoryTypes.All)
-    {
-        var orders = await quickJobService.GetOrdersHistory(historyType);
-        return Ok(orders);
-    }
 }
