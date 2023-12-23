@@ -130,6 +130,8 @@ public sealed class QuickJobService : IQuickJobService
             case HistoryType.Worker:
                 await AddWorkerOrders(orders);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(historyType), historyType, null);
         }
         return orders;
     }
@@ -196,15 +198,22 @@ public sealed class QuickJobService : IQuickJobService
 
     private async Task AddWorkerOrders(SearchOrdersResponse orders)
     {
-        //var responses = responsesStorage.GetResponsesByUserId(RequestContext.ClientInfo.UserId)
-        //var workerOrders = ordersStorage.GetOrdersById(responses.Select(x => x.Id))
-        throw new NotImplementedException();
+        var responsesResult = await responsesStorage.GetResponsesByOrderId(RequestContext.ClientInfo.UserId);
+        
+        if (!responsesResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responsesResult.ErrorResult.ErrorMessage));
+        
+        orders.FoundItems.AddRange(responsesResult.Response.Select(x => x.Order.ToResponse()).ToList());
     }
 
     private async Task AddCustomerOrders(SearchOrdersResponse orders)
     {
-        //var customerOrders = ordersStorage.GetOrdersByUserId(RequestContext.ClientInfo.UserId)
-        throw new NotImplementedException();
+        var ordersResult = await ordersStorage.GetOrdersByCustomer(RequestContext.ClientInfo.UserId);
+        
+        if (!ordersResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(ordersResult.ErrorResult.ErrorMessage));
+
+        orders.FoundItems.AddRange(ordersResult.Response.Select(x => x.ToResponse()).ToList());
     }
     
     private async Task<List<string>> UploadFiles(List<IFormFile> files)

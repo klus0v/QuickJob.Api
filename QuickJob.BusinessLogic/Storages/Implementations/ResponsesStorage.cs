@@ -35,4 +35,24 @@ public sealed class ResponsesStorage : IResponsesStorage
             return EntityResult<IReadOnlyList<Response>>.CreateError(new ErrorResult(e.Message, e.HResult));
         }
     }
+
+    public async Task<EntityResult<IReadOnlyList<Response>>> GetResponsesByUserId(Guid userId)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            var responses = await dbContext
+                .Set<Response>()
+                .Include(r => r.Order)
+                .Where(s => s.UserId == userId)
+                .ToListAsync();
+
+            return EntityResult<IReadOnlyList<Response>>.CreateSuccessful(responses);
+        }
+        catch (Exception e)
+        {
+            log.Error($"Get responses for user: '{userId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<IReadOnlyList<Response>>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
 }

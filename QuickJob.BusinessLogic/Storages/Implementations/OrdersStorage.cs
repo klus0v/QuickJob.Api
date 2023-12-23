@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using QuickJob.BusinessLogic.Extensions;
 using QuickJob.DataModel.Api;
 using QuickJob.DataModel.Api.Requests.Orders;
-using QuickJob.DataModel.Api.Responses;
 using QuickJob.DataModel.Context;
 using QuickJob.DataModel.Postgres;
 using QuickJob.DataModel.Postgres.Entities;
@@ -108,6 +107,25 @@ public sealed class OrdersStorage : IOrdersStorage
         {
             log.Error($"Get order: '{orderId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
             return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
+    public async Task<EntityResult<List<Order>>> GetOrdersByCustomer(Guid customerId)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            var orders = await dbContext
+                .Set<Order>()
+                .Where(o => o.CustomerId == customerId)
+                .ToListAsync();
+
+            return EntityResult<List<Order>>.CreateSuccessful(orders);
+        }
+        catch (Exception e)
+        {
+            log.Error($"Get orders for user: '{customerId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<List<Order>>.CreateError(new ErrorResult(e.Message, e.HResult));
         }
     }
 
