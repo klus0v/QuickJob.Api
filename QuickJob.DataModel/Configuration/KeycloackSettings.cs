@@ -14,13 +14,4 @@ public class KeycloackSettings
     public string ClientSecret { get; set; }
     public string Login { get; set; }
     public string Password { get; set; }
-    
-    public Attributes Attributes { get; set; }
-    public TimeSpan InviteExpireIn { get; set; }
-    
-}
-
-public class Attributes
-{
-    public string InviteTime { get; set; }
 }
