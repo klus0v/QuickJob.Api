@@ -150,13 +150,14 @@ public sealed class QuickJobService : IQuickJobService
         if (orderResult.Response.ApprovedResponsesCount == orderResult.Response.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
 
-        //var user = await usersClient.GetUser(userId);
+        //todo var user = await usersClient.GetUser(userId);
         var response = orderId.CreateRespondToEntity(userId, "user.Fio");
         await responsesStorage.CreateResponse(response);
     }
 
     public async Task DeleteRespondToOrder(Guid responseId)
     {
+        //todo normal result pattern
         var responseResult = await responsesStorage.GetResponseById(responseId);
         if (!responseResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage) );
@@ -179,6 +180,7 @@ public sealed class QuickJobService : IQuickJobService
 
     public async Task SetRespondStatus(Guid responseId, ResponseStatus responseStatus)
     {
+        //todo transactions
         var responseResult = await responsesStorage.GetResponseById(responseId);
         if (!responseResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage));
@@ -199,6 +201,7 @@ public sealed class QuickJobService : IQuickJobService
         }
         if (responseStatus == ResponseStatus.Approved)
         {
+            //todo notification
             order.ApprovedResponsesCount++;
             await ordersStorage.UpdateOrder(order);
         }
