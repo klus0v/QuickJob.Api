@@ -36,6 +36,63 @@ public sealed class ResponsesStorage : IResponsesStorage
         }
     }
 
+    public async Task<EntityResult<Response>> GetResponseById(Guid id)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            var response = await dbContext
+                .Set<Response>()
+                .Include(r => r.Order)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            return EntityResult<Response>.CreateSuccessful(response);
+        }
+        catch (Exception e)
+        {
+            log.Error($"Get response: '{id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<Response>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
+    public async Task<EntityResult> DeleteResponse(Response response)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            dbContext
+                .Set<Response>()
+                .Remove(response);
+            await dbContext.SaveChangesAsync();
+
+            return EntityResult.CreateSuccessful();
+        }
+        catch (Exception e)
+        {
+            log.Error($"Delete response: '{response.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
+    public async Task<EntityResult> CreateResponse(Response response)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            await dbContext
+                .Set<Response>()
+                .AddAsync(response);
+            await dbContext.SaveChangesAsync();
+
+            return EntityResult.CreateSuccessful();
+        }
+        catch (Exception e)
+        {
+            log.Error($"Create response: '{response.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
     public async Task<EntityResult<IReadOnlyList<Response>>> GetResponsesByUserId(Guid userId)
     {
         try
@@ -53,6 +110,25 @@ public sealed class ResponsesStorage : IResponsesStorage
         {
             log.Error($"Get responses for user: '{userId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
             return EntityResult<IReadOnlyList<Response>>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
+    public async Task<EntityResult> UpdateResponse(Response response)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            dbContext
+                .Set<Response>()
+                .Update(response);
+            await dbContext.SaveChangesAsync();
+
+            return EntityResult.CreateSuccessful();
+        }
+        catch (Exception e)
+        {
+            log.Error($"Update response: '{response.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
         }
     }
 }

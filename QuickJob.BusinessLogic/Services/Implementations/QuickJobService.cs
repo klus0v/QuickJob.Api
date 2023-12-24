@@ -140,33 +140,37 @@ public sealed class QuickJobService : IQuickJobService
 
     public async Task RespondToOrder(Guid orderId)
     {
-        //var order = await ordersStorage.GetOrderById(orderId);
-        var order = new OrderResponse
-        {
-            
-        };
-        if (order.CustomerId == RequestContext.ClientInfo.UserId)
+        var userId = RequestContext.ClientInfo.UserId;
+        var orderResult = await ordersStorage.GetOrderById(orderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
+        
+        if (orderResult.Response.CustomerId == userId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
-        if (order.ApprovedResponsesCount == order.Limit)
+        if (orderResult.Response.ApprovedResponsesCount == orderResult.Response.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
 
-        
-        //await responsesStorage.AddResponse(orderId, RequestContext.ClientInfo.UserId);
+        //var user = await usersClient.GetUser(userId);
+        var response = orderId.CreateRespondToEntity(userId, "user.Fio");
+        await responsesStorage.CreateResponse(response);
     }
 
     public async Task DeleteRespondToOrder(Guid responseId)
     {
-        //var response = await responsesStorage.GetResponse(responseId, RequestContext.ClientInfo.UserId);
-        var response = new ResponseResponse
+        var responseResult = await responsesStorage.GetResponseById(responseId);
+        if (!responseResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage) );
+        if (responseResult.Response.UserId != RequestContext.ClientInfo.UserId)
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(responseId));
+        
+        await responsesStorage.DeleteResponse(responseResult.Response);
+        
+        if (responseResult.Response.Status == ResponseStatus.Approved)
         {
-            
-        };
-        
-        //await responsesStorage.DeleteResponseByUd(responseId);
-        
-        //if (response.Status == ResponseStatus.Approved) {}
-        //await ordersStorage.UpdateOrderById(response.OrderId, new updateOrderRequest, WITHFILTER);
-
+            var order = responseResult.Response.Order;
+            order.ApprovedResponsesCount--;
+            await ordersStorage.UpdateOrder(order);
+        }
     }
 
     #endregion
@@ -175,22 +179,35 @@ public sealed class QuickJobService : IQuickJobService
 
     public async Task SetRespondStatus(Guid responseId, ResponseStatus responseStatus)
     {
-        //var response = await responsesStorage.GetResponse(responseId, RequestContext.ClientInfo.UserId);
-        //if response already set - 409
-        //var order = await ordersStorage.GetOrderById(response.OrderId);
-        var order = new OrderResponse
-        {
-            
-        };
+        var responseResult = await responsesStorage.GetResponseById(responseId);
+        if (!responseResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage));
+        var response = responseResult.Response;
+        if (response.Status == responseStatus)
+            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.StatusAlreadySet());
+        var orderResult = await ordersStorage.GetOrderById(response.OrderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
+        var order = orderResult.Response;
         if (responseStatus == ResponseStatus.Approved && order.ApprovedResponsesCount == order.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
-        
-        //await responsesStorage.UpdateResponse(responseId, responseStatus);
-        if (responseStatus == ResponseStatus.Rejected)
+
+        if (response.Status == ResponseStatus.Approved && responseStatus == ResponseStatus.Rejected)
         {
             order.ApprovedResponsesCount--;
-            //await ordersStorage.UpdateById(orderId, order);
+            await ordersStorage.UpdateOrder(order);
         }
+        if (responseStatus == ResponseStatus.Approved)
+        {
+            order.ApprovedResponsesCount++;
+            await ordersStorage.UpdateOrder(order);
+        }
+        
+        response.Status = responseStatus;
+        var result = await responsesStorage.UpdateResponse(response);
+        if (!result.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(result.ErrorResult.ErrorMessage));
+        
     }
 
     #endregion
