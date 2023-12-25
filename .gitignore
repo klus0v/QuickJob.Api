@@ -336,7 +336,6 @@ nunit-*.xml
 # Build Results of an ATL Project
 [Dd]ebugPS/
 [Rr]eleasePS/
-[Pp]roperties/
 dlldata.c
 
 # Benchmark Results

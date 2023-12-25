@@ -1,6 +1,0 @@
-@QuickJob.Api_HostAddress = http://localhost:5081
-
-GET {{QuickJob.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

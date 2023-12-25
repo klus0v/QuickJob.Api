@@ -19,23 +19,5 @@
       <ProjectReference Include="..\QuickJob.BusinessLogic\QuickJob.BusinessLogic.csproj" />
       <ProjectReference Include="..\QuickJob.DataModel\QuickJob.DataModel.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Content Update="Properties\S3Settings.json">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-        <Content Update="Properties\ServiceSettings.json">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-        <Content Update="Properties\PostgresSettings.json">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-        <Content Update="Properties\SmtpSettings.json">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-        <Content Update="Properties\KeycloackSettings.json">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
-    </ItemGroup>
     
 </Project>
