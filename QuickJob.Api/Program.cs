@@ -1,7 +1,5 @@
 using QuickJob.Api.DI;
 
-const string FrontSpecificOrigins = "_frontSpecificOrigins";
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSettings();
