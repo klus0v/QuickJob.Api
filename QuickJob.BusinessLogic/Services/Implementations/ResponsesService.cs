@@ -28,6 +28,8 @@ public sealed class ResponsesService : IResponsesService
         var orderResult = await ordersStorage.GetEntityById(orderId);
         if (!orderResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
+        if (orderResult.Response == null)
+            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(orderId));
         
         if (orderResult.Response.CustomerId == userId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
