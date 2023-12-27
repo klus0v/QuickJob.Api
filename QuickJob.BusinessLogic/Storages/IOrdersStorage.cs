@@ -4,13 +4,9 @@ using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Storages;
 
-public interface IOrdersStorage
+public interface IOrdersStorage : IBaseEntityStorage<Order>
 {
-    Task<EntityResult<Order>> GetOrderById(Guid orderId);
+    Task<EntityResult<Order>> GetFullOrderById(Guid orderId);
     Task<EntityResult<List<Order>>> GetOrdersByCustomer(Guid customerId);
-    Task<EntityResult> CreateOrder(Order order);
-    Task<EntityResult> DeleteOrderById(Order order);
-    Task<EntityResult> UpdateOrder(Order order);
-    Task<EntityResult<Order>> GetOnlyOrderById(Guid orderId);
     Task<EntityResult<List<Order>>> SearchOrders(SearchOrdersRequest searchOrdersRequest);
 }

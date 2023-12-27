@@ -8,16 +8,12 @@ namespace QuickJob.DataModel.Postgres.Entities;
 
 [Table("orders")]
 [Index(nameof(CustomerId))]
-public class Order
+public class Order : BaseEntity
 {
     public Order()
     {
     }
 
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public Guid Id { get; set; }
-    
     public string Title { get; set; }
     
     public string Description { get; set; }
@@ -46,11 +42,7 @@ public class Order
     
     public int ApprovedResponsesCount { get; set; }
     
-    public List<string>? FileUrls { get; set; } 
-    
-    public DateTime CreateDateTime { get; set; }
-    
-    public DateTime? EditDateTime { get; set; }
-    
+    public List<string>? FileUrls { get; set; }
+
     public List<Response> Responses { get; set; }
 }

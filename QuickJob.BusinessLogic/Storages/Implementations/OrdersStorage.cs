@@ -10,44 +10,47 @@ using Vostok.Logging.Abstractions;
 
 namespace QuickJob.BusinessLogic.Storages.Implementations;
 
-public sealed class OrdersStorage : IOrdersStorage
+public sealed class OrdersStorage : BaseEntityStorage<Order>, IOrdersStorage
 {
-    private readonly Func<QuickJobContext> dbContextFactory;
-    private readonly ILog log;
-
-    public OrdersStorage(DbContextOptions<QuickJobContext> dbContextOptions, ILog log)
+    public OrdersStorage(DbContextOptions<QuickJobContext> dbContextOptions, ILog log) : base(dbContextOptions, log)
     {
-        this.log = log.ForContext(nameof(OrdersStorage));
-        dbContextFactory = () => new QuickJobContext(dbContextOptions);
     }
 
-    public async IAsyncEnumerable<Order> GetByCustomerId(Guid customerId)
-    {
-        await using var dbContext = dbContextFactory();
-        var query = dbContext
-            .Set<Order>()
-            .Where(s => s.CustomerId == customerId)
-            .AsAsyncEnumerable();
-
-        await foreach (var statistic in query)
-            yield return statistic;
-    }
-
-    public async Task<EntityResult<Order>> GetOnlyOrderById(Guid orderId)
+    public async Task<EntityResult<Order>> GetFullOrderById(Guid orderId)
     {
         try
         {
             await using var dbContext = dbContextFactory();
             var order = await dbContext
                 .Set<Order>()
+                .Include(o => o.Responses)
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             return EntityResult<Order>.CreateSuccessful(order);
         }
         catch (Exception e)
         {
-            log.Error($"Get only order: '{orderId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            log.Error($"Get order: '{orderId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
             return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
+        }
+    }
+
+    public async Task<EntityResult<List<Order>>> GetOrdersByCustomer(Guid customerId)
+    {
+        try
+        {
+            await using var dbContext = dbContextFactory();
+            var orders = await dbContext
+                .Set<Order>()
+                .Where(o => o.CustomerId == customerId)
+                .ToListAsync();
+
+            return EntityResult<List<Order>>.CreateSuccessful(orders);
+        }
+        catch (Exception e)
+        {
+            log.Error($"Get orders for user: '{customerId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
+            return EntityResult<List<Order>>.CreateError(new ErrorResult(e.Message, e.HResult));
         }
     }
 
@@ -88,101 +91,5 @@ public sealed class OrdersStorage : IOrdersStorage
                         && (request.PaymentType == null || order.PaymentType == request.PaymentType)
                         && (!request.StartDateTimeAfter.HasValue || order.StartDateTime > request.StartDateTimeAfter.Value)
                         && (!request.EndDateTimeBefore.HasValue || order.EndDateTime < request.EndDateTimeBefore.Value);
-    }
-
-
-    public async Task<EntityResult<Order>> GetOrderById(Guid orderId)
-    {
-        try
-        {
-            await using var dbContext = dbContextFactory();
-            var order = await dbContext
-                .Set<Order>()
-                .Include(o => o.Responses)
-                .FirstOrDefaultAsync(o => o.Id == orderId);
-
-            return EntityResult<Order>.CreateSuccessful(order);
-        }
-        catch (Exception e)
-        {
-            log.Error($"Get order: '{orderId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
-            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
-        }
-    }
-
-    public async Task<EntityResult<List<Order>>> GetOrdersByCustomer(Guid customerId)
-    {
-        try
-        {
-            await using var dbContext = dbContextFactory();
-            var orders = await dbContext
-                .Set<Order>()
-                .Where(o => o.CustomerId == customerId)
-                .ToListAsync();
-
-            return EntityResult<List<Order>>.CreateSuccessful(orders);
-        }
-        catch (Exception e)
-        {
-            log.Error($"Get orders for user: '{customerId}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
-            return EntityResult<List<Order>>.CreateError(new ErrorResult(e.Message, e.HResult));
-        }
-    }
-
-    public async Task<EntityResult> CreateOrder(Order order)
-    {
-        try
-        {
-            await using var dbContext = dbContextFactory();
-            await dbContext
-                .Set<Order>()
-                .AddAsync(order);
-            await dbContext.SaveChangesAsync();
-
-            return EntityResult.CreateSuccessful();
-        }
-        catch (Exception e)
-        {
-            log.Error($"Create order: '{order.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
-            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
-        }
-    }
-
-    public async Task<EntityResult> DeleteOrderById(Order order)
-    {
-        try
-        {
-            await using var dbContext = dbContextFactory();
-            dbContext
-                .Set<Order>()
-                .Remove(order);
-            await dbContext.SaveChangesAsync();
-
-            return EntityResult.CreateSuccessful();
-        }
-        catch (Exception e)
-        {
-            log.Error($"Delete order: '{order.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
-            return EntityResult.CreateError(new ErrorResult(e.Message, e.HResult));
-        }
-    }
-
-    public async Task<EntityResult> UpdateOrder(Order order)
-    {
-        try
-        {
-            await using var dbContext = dbContextFactory();
-            dbContext
-                .Set<Order>()
-                .Update(order);
-            await dbContext.SaveChangesAsync();
-
-            return EntityResult.CreateSuccessful();
-        }
-        catch (Exception e)
-        {
-            log.Error($"Update order: '{order.Id}' fail with error: '{e.Message}'; StackTrace: '{e.StackTrace}'.");
-            return EntityResult<Order>.CreateError(new ErrorResult(e.Message, e.HResult));
-        }
     }
 }
