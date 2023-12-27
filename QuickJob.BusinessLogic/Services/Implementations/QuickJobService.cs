@@ -164,6 +164,8 @@ public sealed class QuickJobService : IQuickJobService
         var responseResult = await responsesStorage.GetResponseById(responseId);
         if (!responseResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage) );
+        if (responseResult.Response == null)
+            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(responseId));
         if (responseResult.Response.UserId != RequestContext.ClientInfo.UserId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(responseId));
         
@@ -187,6 +189,8 @@ public sealed class QuickJobService : IQuickJobService
         var responseResult = await responsesStorage.GetResponseById(responseId);
         if (!responseResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage));
+        if (responseResult.Response == null)
+            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(responseId));
         var response = responseResult.Response;
         if (response.Status == responseStatus)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.StatusAlreadySet());
