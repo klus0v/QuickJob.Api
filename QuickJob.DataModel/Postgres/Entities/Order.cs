@@ -44,5 +44,5 @@ public class Order : BaseEntity
     
     public List<string>? FileUrls { get; set; }
 
-    public List<Response> Responses { get; set; }
+    public List<Response> Responses { get; set; } = new();
 }
