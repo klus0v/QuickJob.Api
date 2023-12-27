@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuickJob.DataModel.Postgres;
@@ -12,9 +13,11 @@ using QuickJob.DataModel.Postgres;
 namespace QuickJob.DataModel.Migrations
 {
     [DbContext(typeof(QuickJobContext))]
-    partial class QuickJobContextModelSnapshot : ModelSnapshot
+    [Migration("20231227181631_server_v2")]
+    partial class server_v2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
