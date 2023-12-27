@@ -11,16 +11,13 @@ using QuickJob.DataModel.Exceptions;
 
 namespace QuickJob.BusinessLogic.Services.Implementations;
 
-public sealed class QuickJobService : IQuickJobService
+public sealed class OrdersService : IOrdersService
 {
     private readonly IOrdersStorage ordersStorage;
     private readonly IResponsesStorage responsesStorage;
     private readonly IS3Storage s3Storage;
 
-    public QuickJobService(
-        IOrdersStorage ordersStorage, 
-        IResponsesStorage responsesStorage, 
-        IS3Storage s3Storage)
+    public OrdersService(IOrdersStorage ordersStorage, IResponsesStorage responsesStorage, IS3Storage s3Storage)
     {
         this.ordersStorage = ordersStorage;
         this.responsesStorage = responsesStorage;
@@ -140,116 +137,27 @@ public sealed class QuickJobService : IQuickJobService
         return orders;
     }
 
-    #region Workers
-
-    public async Task RespondToOrder(Guid orderId)
-    {
-        var userId = RequestContext.ClientInfo.UserId;
-        var orderResult = await ordersStorage.GetEntityById(orderId);
-        if (!orderResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
-        
-        if (orderResult.Response.CustomerId == userId)
-            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
-        if (orderResult.Response.ApprovedResponsesCount == orderResult.Response.Limit)
-            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
-
-        var response = orderId.CreateRespondToEntity(userId, RequestContext.ClientInfo.Name);
-        await responsesStorage.CreateEntity(response);
-    }
-
-    public async Task DeleteRespondToOrder(Guid responseId)
-    {
-        //todo normal result pattern
-        var responseResult = await responsesStorage.GetEntityById(responseId);
-        if (!responseResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage) );
-        if (responseResult.Response == null)
-            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(responseId));
-        if (responseResult.Response.UserId != RequestContext.ClientInfo.UserId)
-            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(responseId));
-        
-        await responsesStorage.DeleteEntity(responseResult.Response);
-        
-        if (responseResult.Response.Status == ResponseStatus.Approved)
-        {
-            var order = responseResult.Response.Order;
-            order.ApprovedResponsesCount--;
-            await ordersStorage.UpdateEntity(order);
-        }
-    }
-
-    #endregion
-
-    #region Customers
-
-    public async Task SetRespondStatus(Guid responseId, ResponseStatus responseStatus)
-    {
-        //todo transactions
-        var responseResult = await responsesStorage.GetEntityById(responseId);
-        if (!responseResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage));
-        if (responseResult.Response == null)
-            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(responseId));
-        var response = responseResult.Response;
-        if (response.Status == responseStatus)
-            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.StatusAlreadySet());
-        var orderResult = await ordersStorage.GetEntityById(response.OrderId);
-        if (!orderResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
-        var order = orderResult.Response;
-        if (responseStatus == ResponseStatus.Approved && order.ApprovedResponsesCount == order.Limit)
-            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
-
-        if (response.Status == ResponseStatus.Approved && responseStatus == ResponseStatus.Rejected)
-        {
-            order.ApprovedResponsesCount--;
-            await ordersStorage.UpdateEntity(order);
-        }
-        if (responseStatus == ResponseStatus.Approved)
-        {
-            //todo notification
-            order.ApprovedResponsesCount++;
-            await ordersStorage.UpdateEntity(order);
-        }
-        
-        response.Status = responseStatus;
-        var result = await responsesStorage.UpdateEntity(response);
-        if (!result.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(result.ErrorResult.ErrorMessage));
-        
-    }
-
-    #endregion
-    
-
     private async Task AddWorkerOrders(SearchOrdersResponse orders)
     {
         var responsesResult = await responsesStorage.GetResponsesByOrderId(RequestContext.ClientInfo.UserId);
-        
         if (!responsesResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responsesResult.ErrorResult.ErrorMessage));
-        
         orders.FoundItems.AddRange(responsesResult.Response.Select(x => x.Order.ToResponse()).ToList());
     }
 
     private async Task AddCustomerOrders(SearchOrdersResponse orders)
     {
         var ordersResult = await ordersStorage.GetOrdersByCustomer(RequestContext.ClientInfo.UserId);
-        
         if (!ordersResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(ordersResult.ErrorResult.ErrorMessage));
-
         orders.FoundItems.AddRange(ordersResult.Response.Select(x => x.ToResponse()).ToList());
     }
     
     private async Task<List<string>> UploadFiles(List<IFormFile> files)
     {
         var s3Result = await s3Storage.UploadFiles(files);
-
         if (!s3Result.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.AWS(s3Result.ErrorResult.ErrorMessage));
-        
         return s3Result.Response;
     }
 }

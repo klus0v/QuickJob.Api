@@ -102,7 +102,8 @@ internal static class ServiceCollectionExtensions
 
     public static void AddSystemServices(this IServiceCollection services) => services
         .AddDistributedMemoryCache()
-        .AddSingleton<IQuickJobService, QuickJobService>()
+        .AddSingleton<IOrdersService, OrdersService>()
+        .AddSingleton<IResponsesService, ResponsesService>()
         .AddSingleton<IOrdersStorage, OrdersStorage>()
         .AddSingleton<IResponsesStorage, ResponsesStorage>()
         .AddSingleton<IS3Storage, AWSStorage>();
