@@ -20,6 +20,7 @@ internal sealed class UserAuthMiddleware :  IMiddleware
         
         RequestContext.ClientInfo.IsUserAuthenticated = true;
         RequestContext.ClientInfo.UserId = userId.Value;
+        RequestContext.ClientInfo.Name = context.User.GetName();
         await next.Invoke(context);
     }
     

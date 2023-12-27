@@ -150,8 +150,7 @@ public sealed class QuickJobService : IQuickJobService
         if (orderResult.Response.ApprovedResponsesCount == orderResult.Response.Limit)
             throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.LimitExceeded());
 
-        //todo var user = await usersClient.GetUser(userId);
-        var response = orderId.CreateRespondToEntity(userId, "user.Fio");
+        var response = orderId.CreateRespondToEntity(userId, RequestContext.ClientInfo.Name);
         await responsesStorage.CreateResponse(response);
     }
 

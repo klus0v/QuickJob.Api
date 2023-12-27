@@ -8,4 +8,7 @@ public static class ClaimsPrincipalExtensions
     
     public static string? GetId(this ClaimsPrincipal claimsPrincipal) 
         => claimsPrincipal.Claims.FirstOrDefault(x => x.Type == SubClaim)?.Value ?? null;
+    
+    public static string GetName(this ClaimsPrincipal claimsPrincipal) 
+        => claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value ?? string.Empty;
 }
