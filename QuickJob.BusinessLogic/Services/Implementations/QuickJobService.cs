@@ -117,7 +117,11 @@ public sealed class QuickJobService : IQuickJobService
     
     public async Task<SearchOrdersResponse> GetOrdersHistory(HistoryType historyType)
     {
-        var orders = new SearchOrdersResponse();
+        var orders = new SearchOrdersResponse
+        {
+            FoundItems = new List<OrderResponse>(),
+            TotalCount = 0
+        };
         switch (historyType)
         {
             case HistoryType.All:
