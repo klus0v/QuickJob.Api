@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using QuickJob.Api.Middlewares;
@@ -79,6 +80,10 @@ internal static class ServiceCollectionExtensions
                 In = NSwag.OpenApiSecurityApiKeyLocation.Header,
                 Description = "Type into the textbox: Bearer {your JWT token}."
             });
+        });
+        services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
     }
 
