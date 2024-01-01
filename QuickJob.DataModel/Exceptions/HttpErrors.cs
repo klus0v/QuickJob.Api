@@ -4,7 +4,7 @@ public static class HttpErrors
 {
     private const string PgError = "PgError";
     private const string AWSError = "AWSError";
-    private const string NotFoundError = "NotFoundError";
+    private const string NotFoundError = "NotFound";
     private const string NoAccessError = "NoAccess";
     private const string LimitExceededError = "LimitExceeded";
     private const string StatusAlreadySetError = "StatusAlreadySet";
