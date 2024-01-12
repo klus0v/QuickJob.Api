@@ -7,6 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Vostok.Configuration" Version="0.1.43" />
+        <PackageReference Include="Vostok.Configuration.Abstractions" Version="0.1.15" />
+        <PackageReference Include="Vostok.Configuration.Sources.Json" Version="0.1.8" />
+        <PackageReference Include="Vostok.Logging.Console" Version="1.0.9" />
+        <PackageReference Include="Vostok.Logging.File" Version="1.0.22" />
         <PackageReference Include="Vostok.Context" Version="0.1.7" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
