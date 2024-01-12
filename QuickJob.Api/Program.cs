@@ -9,6 +9,7 @@ builder.Services.AddServiceSwaggerDocument();
 builder.Services.AddServiceCors();
 builder.Services.AddSystemServices();
 builder.Services.AddExternalServices();
+builder.Services.AddRabbitMq();
 builder.Services.AddPostgresStorage();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

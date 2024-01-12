@@ -1,10 +1,7 @@
 using System.Net;
-using Microsoft.AspNetCore.Http;
+using MassTransit;
 using QuickJob.BusinessLogic.Mappers;
 using QuickJob.BusinessLogic.Storages;
-using QuickJob.BusinessLogic.Storages.S3;
-using QuickJob.DataModel.Api.Requests.Orders;
-using QuickJob.DataModel.Api.Responses.Orders;
 using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Context;
 using QuickJob.DataModel.Exceptions;
@@ -15,11 +12,14 @@ public sealed class ResponsesService : IResponsesService
 {
     private readonly IOrdersStorage ordersStorage;
     private readonly IResponsesStorage responsesStorage;
+    private readonly IBus bus;
 
-    public ResponsesService(IOrdersStorage ordersStorage, IResponsesStorage responsesStorage)
+
+    public ResponsesService(IOrdersStorage ordersStorage, IResponsesStorage responsesStorage, IBus bus)
     {
         this.ordersStorage = ordersStorage;
         this.responsesStorage = responsesStorage;
+        this.bus = bus;
     }
 
     public async Task RespondToOrder(Guid orderId)
@@ -63,7 +63,7 @@ public sealed class ResponsesService : IResponsesService
 
     public async Task SetRespondStatus(Guid responseId, ResponseStatus responseStatus)
     {
-        //todo transactions
+        //todo transactions + check userId
         var responseResult = await responsesStorage.GetEntityById(responseId);
         if (!responseResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage));
@@ -86,9 +86,9 @@ public sealed class ResponsesService : IResponsesService
         }
         if (responseStatus == ResponseStatus.Approved)
         {
-            //todo notification
             order.ApprovedResponsesCount++;
             await ordersStorage.UpdateEntity(order);
+            await bus.Publish(response.ToApprovedRespondEvent());
         }
         
         response.Status = responseStatus;

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -55,6 +56,22 @@ internal static class ServiceCollectionExtensions
                 options.Authority = keycloackSettings.Authority;
                 options.Audience = keycloackSettings.Audience;
             });
+    }
+    
+    public static void AddRabbitMq(this IServiceCollection services)
+    {
+        var serviceProvider = services.BuildServiceProvider();
+        var rabbitMqSettings = serviceProvider.GetRequiredService<IConfigurationProvider>().Get<RabbitMQSettings>();        
+
+        services.AddMassTransit(x => x.UsingRabbitMq((context, cfg) =>
+        {
+            cfg.Host(rabbitMqSettings.HostName,  "/", host =>
+            {
+                host.Username(rabbitMqSettings.UserName);
+                host.Password(rabbitMqSettings.Password);
+            });
+            cfg.ConfigureEndpoints(context);
+        }));
     }
     
     public static void AddPostgresStorage(this IServiceCollection services)
