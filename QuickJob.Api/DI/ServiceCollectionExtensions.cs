@@ -111,7 +111,7 @@ internal static class ServiceCollectionExtensions
         provider.SetupSourceFor<ServiceSettings>(new JsonFileSource($"QuickJob.Settings/{nameof(ServiceSettings)}.json"));
         provider.SetupSourceFor<S3Settings>(new JsonFileSource($"QuickJob.Settings/{nameof(S3Settings)}.json"));
         provider.SetupSourceFor<PostgresSettings>(new JsonFileSource($"QuickJob.Settings/{nameof(PostgresSettings)}.json"));
-        provider.SetupSourceFor<SmtpSettings>(new JsonFileSource($"QuickJob.Settings/{nameof(SmtpSettings)}.json"));
+        provider.SetupSourceFor<RabbitMQSettings>(new JsonFileSource($"QuickJob.Settings/{nameof(RabbitMQSettings)}.json"));
         provider.SetupSourceFor<KeycloackSettings>(new JsonFileSource($"QuickJob.Settings/{nameof(KeycloackSettings)}.json"));
 
         services.AddSingleton<IConfigurationProvider>(provider);
@@ -132,9 +132,6 @@ internal static class ServiceCollectionExtensions
         services
             .AddSingleton<AWSClientFactory>()
             .TryAddSingleton(x => x.GetRequiredService<AWSClientFactory>().GetClient());
-        services
-            .AddSingleton<SmtpClientFactory>()
-            .TryAddSingleton(x => x.GetRequiredService<SmtpClientFactory>().GetClient());
     }
     
     public static void AddAuthMiddleware(this IServiceCollection services) =>
