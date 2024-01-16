@@ -9,6 +9,6 @@ public interface IOrdersService
     Task<OrderResponse> GetOrder(Guid orderId);
     Task<OrderResponse> UpdateOrder(Guid orderId, UpdateOrderRequest updateOrderRequest);
     Task DeleteOrder(Guid orderId);
-    Task<List<OrderResponse>> SearchOrders(SearchOrdersRequest searchOrdersRequest);
+    Task<SearchOrdersResponse> SearchOrders(SearchOrdersRequest searchOrdersRequest);
     Task<SearchOrdersResponse> GetOrdersHistory(HistoryType historyType);
 }

@@ -103,13 +103,17 @@ public sealed class OrdersService : IOrdersService
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(deleteResult.ErrorResult.ErrorMessage) );
     }
 
-    public async Task<List<OrderResponse>> SearchOrders(SearchOrdersRequest searchOrdersRequest)
+    public async Task<SearchOrdersResponse> SearchOrders(SearchOrdersRequest searchOrdersRequest)
     {
         var searchResult = await ordersStorage.SearchOrders(searchOrdersRequest);
         if (!searchResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(searchResult.ErrorResult.ErrorMessage) );
 
-        return searchResult.Response.Select(x => x.ToResponse()).ToList();
+        return new SearchOrdersResponse
+        {
+            FoundItems = searchResult.Response.Select(x => x.ToResponse()).ToList(),
+            TotalCount = 0
+        };
     }
     
     public async Task<SearchOrdersResponse> GetOrdersHistory(HistoryType historyType)

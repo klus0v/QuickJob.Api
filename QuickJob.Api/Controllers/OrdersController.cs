@@ -24,6 +24,7 @@ public class OrdersController : ControllerBase
     #region Orders
 
     [HttpPost]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Create([FromForm]CreateOrderRequest createOrderRequest)
     {
         var order = await ordersService.CreateOrder(createOrderRequest);
@@ -31,6 +32,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{orderId}")]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(Guid orderId)
     {
         var order = await ordersService.GetOrder(orderId);
@@ -38,6 +40,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpPatch("{orderId}")]
+    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Update(Guid orderId, [FromForm] UpdateOrderRequest updateOrderRequest)
     {
         var order = await ordersService.UpdateOrder(orderId, updateOrderRequest);
@@ -52,6 +55,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet]
+    [ProducesResponseType(typeof(SearchOrdersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Search([FromQuery] SearchOrdersRequest searchOrdersRequest)
     {
         var orders = await ordersService.SearchOrders(searchOrdersRequest);
@@ -59,6 +63,7 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet("history")]
+    [ProducesResponseType(typeof(SearchOrdersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetHistory([FromQuery] HistoryType historyType = HistoryType.All)
     {
         var orders = await ordersService.GetOrdersHistory(historyType);
