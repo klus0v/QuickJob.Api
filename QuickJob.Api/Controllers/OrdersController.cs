@@ -54,6 +54,7 @@ public class OrdersController : ControllerBase
         return Ok();
     }
     
+    [AllowAnonymous]
     [HttpGet]
     [ProducesResponseType(typeof(SearchOrdersResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Search([FromQuery] SearchOrdersRequest searchOrdersRequest)
