@@ -25,12 +25,14 @@ public sealed class ResponsesService : IResponsesService
     public async Task RespondToOrder(Guid orderId)
     {
         var userId = RequestContext.ClientInfo.UserId;
-        var orderResult = await ordersStorage.GetEntityById(orderId);
+        var orderResult = await ordersStorage.GetFullOrderById(orderId);
         if (!orderResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage));
         if (orderResult.Response == null)
             throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(orderId));
         
+        if (orderResult.Response.Responses.Any(x => x.UserId == userId))
+            throw new CustomHttpException(HttpStatusCode.Conflict, HttpErrors.AlreadyRespond());
         if (orderResult.Response.CustomerId == userId)
             throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(orderId));
         if (orderResult.Response.ApprovedResponsesCount == orderResult.Response.Limit)
