@@ -42,7 +42,7 @@ public sealed class OrdersService : IOrdersService
     
     public async Task<OrderResponse> GetOrder(Guid orderId)
     {
-        var orderResult = await ordersStorage.GetEntityById(orderId);
+        var orderResult = await ordersStorage.GetFullOrderById(orderId);
         if (!orderResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
         if (orderResult.Response == null)
