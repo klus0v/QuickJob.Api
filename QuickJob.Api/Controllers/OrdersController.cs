@@ -31,6 +31,7 @@ public class OrdersController : ControllerBase
         return Ok(order);
     }
 
+    [AllowAnonymous]
     [HttpGet("{orderId}")]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get(Guid orderId)
