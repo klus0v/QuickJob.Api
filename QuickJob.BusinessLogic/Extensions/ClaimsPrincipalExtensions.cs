@@ -9,12 +9,6 @@ public static class ClaimsPrincipalExtensions
     public static string? GetId(this ClaimsPrincipal claimsPrincipal) 
         => claimsPrincipal.Claims.FirstOrDefault(x => x.Type == SubClaim)?.Value ?? null;
     
-    public static string GetName(this ClaimsPrincipal claimsPrincipal)
-    {
-        Console.WriteLine("___1 " + claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value);
-        Console.WriteLine("___2 " + claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value);
-        Console.WriteLine("___3 " + claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.GivenName)?.Value);
-        Console.WriteLine("___4 " + claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Surname)?.Value);
-        return claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value ?? string.Empty;
-    }
+    public static string GetName(this ClaimsPrincipal claimsPrincipal) 
+        => claimsPrincipal.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value ?? string.Empty;
 }

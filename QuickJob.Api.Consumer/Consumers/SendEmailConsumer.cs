@@ -32,9 +32,9 @@ public sealed class ApprovedRespondConsumer: IConsumer<ApprovedRespondEvent>
     public async Task Consume(ConsumeContext<ApprovedRespondEvent> context)
     {
         var user = await usersClient.GetUserAsync(context.Message.UserId);
-        var order = await quickJobClient.Orders.GetOrderAsync(context.Message.OrderId);
+        //var order = await quickJobClient.Orders.GetOrderAsync(context.Message.OrderId);
         
-        if (!user.IsSuccessful || !order.IsSuccessful)
+        if (!user.IsSuccessful)// || !order.IsSuccessful)
         {
             log.Error($"Scip send message: {context.MessageId}");
             return;
@@ -43,7 +43,7 @@ public sealed class ApprovedRespondConsumer: IConsumer<ApprovedRespondEvent>
         switch (user.Response.GetNotificationChanel())
         {
             case ChanelType.Email:
-                var request = GetEmailRequest(user.Response, order.Response.Title);
+                var request = GetEmailRequest(user.Response, "order.Response.Title");
                 await notificationsClient.Email.SendEmailAsync(request);
                 break;
             
