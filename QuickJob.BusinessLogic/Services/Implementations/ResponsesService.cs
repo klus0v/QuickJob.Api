@@ -42,22 +42,23 @@ public sealed class ResponsesService : IResponsesService
         await responsesStorage.CreateEntity(response);
     }
 
-    public async Task DeleteRespondToOrder(Guid responseId)
+    public async Task DeleteRespondToOrder(Guid orderId)
     {
-        //todo normal result pattern
-        var responseResult = await responsesStorage.GetEntityById(responseId);
-        if (!responseResult.IsSuccessful)
-            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responseResult.ErrorResult.ErrorMessage) );
-        if (responseResult.Response == null)
-            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(responseId));
-        if (responseResult.Response.UserId != RequestContext.ClientInfo.UserId)
-            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(responseId));
+        var orderResult = await ordersStorage.GetFullOrderById(orderId);
+        if (!orderResult.IsSuccessful)
+            throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(orderResult.ErrorResult.ErrorMessage) );
         
-        await responsesStorage.DeleteEntity(responseResult.Response);
+        var response = orderResult.Response.Responses.FirstOrDefault(x => x.UserId == RequestContext.ClientInfo.UserId);
+        if (response == null)
+            throw new CustomHttpException(HttpStatusCode.NotFound, HttpErrors.NotFound(""));
+        if (response.UserId != RequestContext.ClientInfo.UserId)
+            throw new CustomHttpException(HttpStatusCode.Forbidden, HttpErrors.NoAccess(response.Id));
         
-        if (responseResult.Response.Status == ResponseStatus.Approved)
+        await responsesStorage.DeleteEntity(response);
+        
+        if (response.Status == ResponseStatus.Approved)
         {
-            var order = responseResult.Response.Order;
+            var order = orderResult.Response;
             order.ApprovedResponsesCount--;
             await ordersStorage.UpdateEntity(order);
         }

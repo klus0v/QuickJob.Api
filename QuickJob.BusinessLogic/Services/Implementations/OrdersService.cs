@@ -146,7 +146,7 @@ public sealed class OrdersService : IOrdersService
         var responsesResult = await responsesStorage.GetResponsesByOrderId(RequestContext.ClientInfo.UserId);
         if (!responsesResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responsesResult.ErrorResult.ErrorMessage));
-        orders.FoundItems.AddRange(responsesResult.Response.Select(x => x.Order.ToResponse()).ToList());
+        orders.FoundItems.AddRange(responsesResult.Response.Select(x => x.Order.ToResponse(x.Status)).ToList());
     }
 
     private async Task AddCustomerOrders(SearchOrdersResponse orders)

@@ -83,10 +83,10 @@ public class OrdersController : ControllerBase
         return Ok();
     }
     
-    [HttpDelete("{orderId}/responses/{responseId}")]
-    public async Task<IActionResult> DeleteRespondToOrder(Guid responseId)
+    [HttpDelete("{orderId}/responses")]
+    public async Task<IActionResult> DeleteRespondToOrder(Guid orderId)
     {
-        await responsesService.DeleteRespondToOrder(responseId);
+        await responsesService.DeleteRespondToOrder(orderId);
         return Ok();
     }
 

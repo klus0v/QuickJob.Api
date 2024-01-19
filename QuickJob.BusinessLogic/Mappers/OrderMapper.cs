@@ -1,5 +1,6 @@
 using QuickJob.DataModel.Api.Requests.Orders;
 using QuickJob.DataModel.Api.Responses.Orders;
+using QuickJob.DataModel.Api.Responses.Responses;
 using QuickJob.DataModel.Postgres.Entities;
 
 namespace QuickJob.BusinessLogic.Mappers;
@@ -31,6 +32,14 @@ public static class OrderMapper
             CreateDateTime = order.CreateDateTime
         };
     }
+    
+    public static OrderResponse ToResponse(this Order order, ResponseStatus status)
+    {
+        var orderResponse = order.ToResponse();
+        orderResponse.ResponseStatus = status.ToString();
+        return orderResponse;
+    }
+    
     public static Order ToEntity(this CreateOrderRequest createOrderRequest, Guid userId)
     {
         return new Order
