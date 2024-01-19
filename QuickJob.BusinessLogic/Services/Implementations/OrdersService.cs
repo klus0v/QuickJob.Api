@@ -143,7 +143,7 @@ public sealed class OrdersService : IOrdersService
 
     private async Task AddWorkerOrders(SearchOrdersResponse orders)
     {
-        var responsesResult = await responsesStorage.GetResponsesByOrderId(RequestContext.ClientInfo.UserId);
+        var responsesResult = await responsesStorage.GetResponsesByUserId(RequestContext.ClientInfo.UserId);
         if (!responsesResult.IsSuccessful)
             throw new CustomHttpException(HttpStatusCode.ServiceUnavailable, HttpErrors.Pg(responsesResult.ErrorResult.ErrorMessage));
         orders.FoundItems.AddRange(responsesResult.Response.Select(x => x.Order.ToResponse(x.Status)).ToList());
