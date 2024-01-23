@@ -1,5 +1,6 @@
 ### Как примерно все устроенно:
-![изображение](https://github.com/klus0v/QuickJob.Settings/assets/72307503/7ea2f1be-05b0-4c6f-a92e-74e4679f980f)
+
+![изображение](https://github.com/klus0v/QuickJob.Api/assets/72307503/1989b104-8f58-40d3-8100-082b3ad329d3)
 
 ### Структура 
 1. [QuickJob.Settings](https://github.com/klus0v/QuickJob.Settings) - приватный репо со всеми настройками (каждое апи в своей ветке)
